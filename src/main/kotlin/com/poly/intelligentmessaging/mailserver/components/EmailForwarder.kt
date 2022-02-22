@@ -59,6 +59,7 @@ class EmailForwarder {
             listMessageForForward.add(messageFields)
             message.setFlag(Flags.Flag.DELETED, true)
         }
+        inbox.close()
         return listMessageForForward
     }
 
