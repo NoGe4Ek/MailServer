@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component
 import javax.mail.Flags
 import javax.mail.Folder
 import javax.mail.Session
+import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 
@@ -44,8 +45,7 @@ class EmailForwarder {
         requireNotNull(inbox) { throw MailException("Unable to connect to INBOX. Login: ${auth.login}") }
         inbox.open(Folder.READ_WRITE)
         val messages = inbox.messages.filter {
-            println(it.from[0].toString())
-            it.from[0].toString() == sender
+            (it.from[0] as InternetAddress).address == sender
         }
         if (messages.isEmpty()) return null
         for (message in messages) {
