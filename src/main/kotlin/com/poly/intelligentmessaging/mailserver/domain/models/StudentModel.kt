@@ -1,8 +1,8 @@
-package com.poly.intelligentmessaging.mailserver.models
+package com.poly.intelligentmessaging.mailserver.domain.models
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
-import org.springframework.lang.NonNull
 import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.*
@@ -19,50 +19,12 @@ data class StudentModel(
     @JoinColumn(name = "id_person", nullable = false)
     val person: PersonModel? = null,
 
-    @Column(name = "country")
-    @NonNull
-    val country: String? = null,
-
-    @Column(name = "department")
-    @NonNull
-    val department: String? = null,
-
-    @Column(name = "financing")
-    @NonNull
-    val financing: String? = null,
-
-    @Column(name = "education_format")
-    @NonNull
-    val educationFormat: String? = null,
-
-    @Column(name = "program_type")
-    @NonNull
-    val programType: String? = null,
-
-    @Column(name = "direction")
-    @NonNull
-    val direction: String? = null,
-
-    @Column(name = "directionality")
-    @NonNull
-    val directionality: String? = null,
-
-    @Column(name = "target_direction")
-    @NonNull
-    val targetDirection: String? = null,
-
-    @Column(name = "group_number")
-    @NonNull
-    val groupNumber: String? = null,
-
-    @Column(name = "course")
-    @NonNull
-    val course: Int? = null,
-
+    @JsonIgnore
     @CreationTimestamp
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
         name = "student_to_attribute",
@@ -71,6 +33,7 @@ data class StudentModel(
     )
     val attributes: Set<AttributeModel>? = null,
 
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
         name = "student_to_filter",
@@ -94,16 +57,6 @@ data class StudentModel(
         return this::class.simpleName + "(" +
                 "id = $id , " +
                 "person = $person , " +
-                "country = $country , " +
-                "department = $department , " +
-                "financing = $financing , " +
-                "educationFormat = $educationFormat , " +
-                "programType = $programType , " +
-                "direction = $direction , " +
-                "directionality = $directionality , " +
-                "targetDirection = $targetDirection , " +
-                "groupNumber = $groupNumber , " +
-                "course = $course , " +
                 "created = $created " +
                 ")"
     }

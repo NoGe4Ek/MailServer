@@ -1,4 +1,4 @@
-package com.poly.intelligentmessaging.mailserver.models.custom
+package com.poly.intelligentmessaging.mailserver.domain
 
 import javax.mail.internet.MimeMultipart
 

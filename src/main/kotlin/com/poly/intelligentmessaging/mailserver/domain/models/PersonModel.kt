@@ -1,5 +1,6 @@
-package com.poly.intelligentmessaging.mailserver.models
+package com.poly.intelligentmessaging.mailserver.domain.models
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
 import org.springframework.lang.NonNull
@@ -10,6 +11,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "person")
 data class PersonModel(
+    @JsonIgnore
     @Id
     @GeneratedValue
     @Column(name = "id", updatable = false, nullable = false)
@@ -31,6 +33,7 @@ data class PersonModel(
     @NonNull
     val email: String? = null,
 
+    @JsonIgnore
     @CreationTimestamp
     @Column(name = "created")
     val created: LocalDateTime? = null

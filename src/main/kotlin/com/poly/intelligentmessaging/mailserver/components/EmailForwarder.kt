@@ -1,9 +1,9 @@
 package com.poly.intelligentmessaging.mailserver.components
 
 import com.poly.intelligentmessaging.mailserver.configuration.MailProperties
+import com.poly.intelligentmessaging.mailserver.domain.MessageFields
+import com.poly.intelligentmessaging.mailserver.domain.models.StudentModel
 import com.poly.intelligentmessaging.mailserver.exceptions.MailException
-import com.poly.intelligentmessaging.mailserver.models.StudentModel
-import com.poly.intelligentmessaging.mailserver.models.custom.MessageFields
 import com.poly.intelligentmessaging.mailserver.util.EmailAuthenticator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -45,6 +45,7 @@ class EmailForwarder {
         requireNotNull(inbox) { throw MailException("Unable to connect to INBOX. Login: ${auth.login}") }
         inbox.open(Folder.READ_WRITE)
         val messages = inbox.messages.filter {
+            println(it.from[0] as InternetAddress)
             (it.from[0] as InternetAddress).address == sender
         }
         if (messages.isEmpty()) return null

@@ -16,3 +16,8 @@ deploy scp -P 4080 ./target/MailServer-0.0.4.jar root@ntarasenko.simsim.ftp.sh:/
 users /etc/dovecot/users
 
 https://www.8host.com/blog/nastrojka-pochtovogo-servera-postfixdovecot/
+
+1) noreply
+2) domain filter
+3) lmtp + backend
+4) frontend

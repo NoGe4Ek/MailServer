@@ -50,16 +50,6 @@ CREATE TABLE student
 (
     id               UUID PRIMARY KEY,
     id_person        UUID        NOT NULL,
-    country          TEXT        NOT NULL,
-    department       TEXT        NOT NULL,
-    financing        TEXT        NOT NULL,
-    education_format TEXT        NOT NULL,
-    program_type     TEXT        NOT NULL,
-    direction        TEXT        NOT NULL,
-    directionality   TEXT        NOT NULL,
-    target_direction BOOLEAN     NOT NULL,
-    group_number     TEXT        NOT NULL,
-    course           INT         NOT NULL,
     created          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (id_person) REFERENCES person (id)
 );
@@ -75,30 +65,23 @@ CREATE TABLE filter
     FOREIGN KEY (id_staff) REFERENCES staff (id)
 );
 
+CREATE TABLE group_attributes
+(
+    id      UUID PRIMARY KEY,
+    name    TEXT        NOT NULL,
+    created TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE attribute
 (
-    id         UUID PRIMARY KEY,
-    id_staff   UUID        NOT NULL,
-    name       TEXT        NOT NULL,
-    expression TEXT,
-    created    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (id_staff) REFERENCES staff (id)
-);
-
-CREATE TABLE staff_to_filter
-(
-    id_staff  UUID NOT NULL,
-    id_filter UUID NOT NULL,
+    id                 UUID PRIMARY KEY,
+    id_staff           UUID        NOT NULL,
+    id_group_attribute UUID        NOT NULL,
+    name               TEXT        NOT NULL,
+    expression         TEXT,
+    created            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (id_staff) REFERENCES staff (id),
-    FOREIGN KEY (id_filter) REFERENCES filter (id)
-);
-
-CREATE TABLE staff_to_attribute
-(
-    id_staff     UUID NOT NULL,
-    id_attribute UUID NOT NULL,
-    FOREIGN KEY (id_staff) REFERENCES staff (id),
-    FOREIGN KEY (id_attribute) REFERENCES attribute (id)
+    FOREIGN KEY (id_group_attribute) REFERENCES group_attributes (id)
 );
 
 CREATE TABLE student_to_filter

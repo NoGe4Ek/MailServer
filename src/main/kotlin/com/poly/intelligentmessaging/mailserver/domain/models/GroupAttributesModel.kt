@@ -1,40 +1,34 @@
-package com.poly.intelligentmessaging.mailserver.models
+package com.poly.intelligentmessaging.mailserver.domain.models
 
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
-import org.springframework.lang.NonNull
 import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "possibility")
-data class PossibilityModel(
+@Table(name = "group_attributes")
+data class GroupAttributesModel(
     @Id
     @GeneratedValue
     @Column(name = "id", updatable = false, nullable = false)
     val id: UUID? = null,
 
     @Column(name = "name")
-    @NonNull
     val name: String? = null,
 
     @CreationTimestamp
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @ManyToMany
-    @JoinTable(
-        name = "role_to_possibility",
-        joinColumns = [JoinColumn(name = "id_possibility", referencedColumnName = "id")],
-        inverseJoinColumns = [JoinColumn(name = "id_role", referencedColumnName = "id")]
-    )
-    val roles: Set<RoleModel>? = null
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_group_attribute")
+    val attributes: Set<AttributeModel>? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-        other as PossibilityModel
+        other as GroupAttributesModel
 
         return id != null && id == other.id
     }

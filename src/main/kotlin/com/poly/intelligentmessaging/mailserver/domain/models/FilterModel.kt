@@ -1,4 +1,4 @@
-package com.poly.intelligentmessaging.mailserver.models
+package com.poly.intelligentmessaging.mailserver.domain.models
 
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
@@ -8,8 +8,8 @@ import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "attribute")
-data class AttributeModel(
+@Table(name = "filter")
+data class FilterModel(
     @Id
     @GeneratedValue
     @Column(name = "id", updatable = false, nullable = false)
@@ -17,7 +17,11 @@ data class AttributeModel(
 
     @ManyToOne
     @JoinColumn(name = "id_staff", nullable = false)
-    val staffCreator: StaffModel? = null,
+    val staff: StaffModel? = null,
+
+    @Column(name = "email")
+    @NonNull
+    val email: String? = null,
 
     @Column(name = "name")
     @NonNull
@@ -32,24 +36,19 @@ data class AttributeModel(
 
     @ManyToMany
     @JoinTable(
-        name = "staff_to_attribute",
-        joinColumns = [JoinColumn(name = "id_attribute", referencedColumnName = "id")],
-        inverseJoinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")]
-    )
-    val staff: Set<StaffModel>? = null,
-
-    @ManyToMany
-    @JoinTable(
-        name = "student_to_attribute",
-        joinColumns = [JoinColumn(name = "id_attribute", referencedColumnName = "id")],
+        name = "student_to_filter",
+        joinColumns = [JoinColumn(name = "id_filter", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "id_student", referencedColumnName = "id")]
     )
     val student: Set<StudentModel>? = null,
+
+    @OneToMany
+    val virtualUser: Set<MailVirtualUserModel>? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-        other as AttributeModel
+        other as FilterModel
 
         return id != null && id == other.id
     }
@@ -61,6 +60,7 @@ data class AttributeModel(
         return this::class.simpleName + "(" +
                 "id = $id , " +
                 "staff = $staff , " +
+                "email = $email , " +
                 "name = $name , " +
                 "expression = $expression , " +
                 "created = $created " +

@@ -1,6 +1,6 @@
 package com.poly.intelligentmessaging.mailserver.components
 
-import com.poly.intelligentmessaging.mailserver.models.custom.MessageFields
+import com.poly.intelligentmessaging.mailserver.domain.MessageFields
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper

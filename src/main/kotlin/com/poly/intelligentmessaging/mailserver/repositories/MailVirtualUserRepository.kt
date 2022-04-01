@@ -1,6 +1,6 @@
 package com.poly.intelligentmessaging.mailserver.repositories
 
-import com.poly.intelligentmessaging.mailserver.models.MailVirtualUserModel
+import com.poly.intelligentmessaging.mailserver.domain.models.MailVirtualUserModel
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository

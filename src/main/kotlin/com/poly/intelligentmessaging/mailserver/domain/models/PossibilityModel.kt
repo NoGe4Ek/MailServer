@@ -1,4 +1,4 @@
-package com.poly.intelligentmessaging.mailserver.models
+package com.poly.intelligentmessaging.mailserver.domain.models
 
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
@@ -8,8 +8,8 @@ import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "role")
-data class RoleModel(
+@Table(name = "possibility")
+data class PossibilityModel(
     @Id
     @GeneratedValue
     @Column(name = "id", updatable = false, nullable = false)
@@ -26,23 +26,15 @@ data class RoleModel(
     @ManyToMany
     @JoinTable(
         name = "role_to_possibility",
-        joinColumns = [JoinColumn(name = "id_role", referencedColumnName = "id")],
-        inverseJoinColumns = [JoinColumn(name = "id_possibility", referencedColumnName = "id")]
+        joinColumns = [JoinColumn(name = "id_possibility", referencedColumnName = "id")],
+        inverseJoinColumns = [JoinColumn(name = "id_role", referencedColumnName = "id")]
     )
-    val possibilities: Set<PossibilityModel>? = null,
-
-    @ManyToMany
-    @JoinTable(
-        name = "role_to_staff",
-        joinColumns = [JoinColumn(name = "id_role", referencedColumnName = "id")],
-        inverseJoinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")]
-    )
-    val staff: Set<StaffModel>? = null
+    val roles: Set<RoleModel>? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-        other as RoleModel
+        other as PossibilityModel
 
         return id != null && id == other.id
     }

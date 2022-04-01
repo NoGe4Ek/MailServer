@@ -1,4 +1,4 @@
-package com.poly.intelligentmessaging.mailserver.models
+package com.poly.intelligentmessaging.mailserver.domain.models
 
 
 import org.hibernate.Hibernate
@@ -37,23 +37,7 @@ data class StaffModel(
         joinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "id_role", referencedColumnName = "id")]
     )
-    val roles: Set<RoleModel>? = null,
-
-    @ManyToMany
-    @JoinTable(
-        name = "staff_to_attribute",
-        joinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")],
-        inverseJoinColumns = [JoinColumn(name = "id_attribute", referencedColumnName = "id")]
-    )
-    val attributes: Set<AttributeModel>? = null,
-
-    @ManyToMany
-    @JoinTable(
-        name = "staff_to_filter",
-        joinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")],
-        inverseJoinColumns = [JoinColumn(name = "id_filter", referencedColumnName = "id")]
-    )
-    val filters: Set<FilterModel>? = null,
+    val roles: Set<RoleModel>? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
