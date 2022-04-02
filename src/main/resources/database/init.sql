@@ -67,9 +67,11 @@ CREATE TABLE filter
 
 CREATE TABLE group_attributes
 (
-    id      UUID PRIMARY KEY,
-    name    TEXT        NOT NULL,
-    created TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id       UUID PRIMARY KEY,
+    id_staff UUID        NOT NULL,
+    name     TEXT        NOT NULL,
+    created  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (id_staff) REFERENCES staff (id)
 );
 
 CREATE TABLE attribute

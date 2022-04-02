@@ -15,17 +15,17 @@ data class AttributeModel(
     @Column(name = "id", updatable = false, nullable = false)
     val id: UUID? = null,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
     @JoinColumn(name = "id_staff", nullable = false)
     val staff: StaffModel? = null,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
     @JoinColumn(name = "id_group_attribute", nullable = false)
-    val group: GroupAttributesModel? = null,
+    var group: GroupAttributesModel? = null,
 
     @Column(name = "name")
     @NonNull
-    val name: String? = null,
+    var name: String? = null,
 
     @Column(name = "expression")
     val expression: String? = null,
@@ -34,13 +34,13 @@ data class AttributeModel(
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
     @JoinTable(
         name = "student_to_attribute",
         joinColumns = [JoinColumn(name = "id_attribute", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "id_student", referencedColumnName = "id")]
     )
-    val student: Set<StudentModel>? = null,
+    var student: Set<StudentModel>? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

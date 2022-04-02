@@ -23,25 +23,25 @@ INSERT INTO staff
 VALUES ('725cee0f-7a95-4094-b19a-11b27f779490', 'f53a37c1-4db0-4c50-a490-6ef18f74c20f');
 
 INSERT INTO group_attributes
-VALUES ('a6d2f576-1c52-48f1-b092-5fe5dbfe860f', 'Страна');
+VALUES ('a6d2f576-1c52-48f1-b092-5fe5dbfe860f', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Страна');
 INSERT INTO group_attributes
-VALUES ('d68ca5d9-1124-4d3f-b192-cfd52c30449c', 'Подразделение');
+VALUES ('d68ca5d9-1124-4d3f-b192-cfd52c30449c', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Подразделение');
 INSERT INTO group_attributes
-VALUES ('b7a1e33d-505e-4350-9602-c3fdce0330ca', 'Финансирование');
+VALUES ('b7a1e33d-505e-4350-9602-c3fdce0330ca', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Финансирование');
 INSERT INTO group_attributes
-VALUES ('7a73efd2-2b36-42c3-9304-4036a5a85c64', 'Форма обучения');
+VALUES ('7a73efd2-2b36-42c3-9304-4036a5a85c64', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Форма обучения');
 INSERT INTO group_attributes
-VALUES ('655be334-435f-486f-913a-09155cac31a6', 'Тип программы');
+VALUES ('655be334-435f-486f-913a-09155cac31a6', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Тип программы');
 INSERT INTO group_attributes
-VALUES ('98a7291b-9577-4d37-bf37-efc0dfbca7f0', 'Направление');
+VALUES ('98a7291b-9577-4d37-bf37-efc0dfbca7f0', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Направление');
 INSERT INTO group_attributes
-VALUES ('357a94ac-5017-42c2-b5cf-7f571b20174b', 'Направленность');
+VALUES ('357a94ac-5017-42c2-b5cf-7f571b20174b', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Направленность');
 INSERT INTO group_attributes
-VALUES ('a2bde73b-1000-4404-9bf7-461b33441c17', 'Целевое назначение');
+VALUES ('a2bde73b-1000-4404-9bf7-461b33441c17', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Целевое назначение');
 INSERT INTO group_attributes
-VALUES ('a429a404-5edc-450c-8445-96fc86ae77e7', 'Номер группы');
+VALUES ('a429a404-5edc-450c-8445-96fc86ae77e7', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Номер группы');
 INSERT INTO group_attributes
-VALUES ('cd3e9ad6-5535-46d2-98b4-e2214583126f', 'Курс');
+VALUES ('cd3e9ad6-5535-46d2-98b4-e2214583126f', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Курс');
 
 INSERT INTO attribute
 VALUES ('318511c1-e9b1-4597-8e93-b68149fd3657', 'ad7a8951-2f95-4619-802b-1285c3279623',

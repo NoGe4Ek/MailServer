@@ -24,10 +24,14 @@ class StudentService {
             val attributeName = student.getAttributeName()
 
             if (listStudentsDTO.containsKey(studentId)) {
-                listStudentsDTO[studentId]!!.attributes[groupAttributeName] = attributeName
+                if (listStudentsDTO[studentId]!!.attributes.containsKey(groupAttributeName)) {
+                    listStudentsDTO[studentId]!!.attributes[groupAttributeName]!!.add(attributeName)
+                } else {
+                    listStudentsDTO[studentId]!!.attributes[groupAttributeName] = mutableListOf(attributeName)
+                }
             } else {
                 val studentDTO = StudentsDTO(studentId, studentName, studentEmail)
-                studentDTO.attributes[groupAttributeName] = attributeName
+                studentDTO.attributes[groupAttributeName] = mutableListOf(attributeName)
                 listStudentsDTO[studentId] = studentDTO
             }
         }

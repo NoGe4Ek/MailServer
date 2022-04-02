@@ -14,6 +14,10 @@ data class GroupAttributesModel(
     @Column(name = "id", updatable = false, nullable = false)
     val id: UUID? = null,
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
+    @JoinColumn(name = "id_staff", nullable = false)
+    val staff: StaffModel? = null,
+
     @Column(name = "name")
     val name: String? = null,
 
@@ -21,7 +25,7 @@ data class GroupAttributesModel(
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
     @JoinColumn(name = "id_group_attribute")
     val attributes: Set<AttributeModel>? = null,
 ) {

@@ -1,9 +1,11 @@
 package com.poly.intelligentmessaging.mailserver.services
 
+import com.poly.intelligentmessaging.mailserver.domain.dto.AttributeIdDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.AttributesDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.NewAttributeDTO
 import com.poly.intelligentmessaging.mailserver.domain.models.AttributeModel
 import com.poly.intelligentmessaging.mailserver.domain.models.StudentModel
+import com.poly.intelligentmessaging.mailserver.domain.projections.AttributeProjection
 import com.poly.intelligentmessaging.mailserver.repositories.AttributeRepository
 import com.poly.intelligentmessaging.mailserver.repositories.GroupAttributesRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
@@ -27,8 +29,17 @@ class AttributeService {
     @Autowired
     val staffRepository: StaffRepository? = null
 
-    fun getAttributes(): List<AttributesDTO> {
-        val attributes = attributeRepository!!.getAttributes()
+    fun getAttributes(idStaff: String): List<AttributesDTO> {
+        val attributes = attributeRepository!!.getAttributes(idStaff)
+        return attributesConvertToDTO(attributes)
+    }
+
+    fun getAttributesCurrentStaff(idStaff: String): List<AttributesDTO> {
+        val attributes = attributeRepository!!.getAttributesCurrentStaff(idStaff)
+        return attributesConvertToDTO(attributes)
+    }
+
+    private fun attributesConvertToDTO(attributes: MutableList<AttributeProjection>): List<AttributesDTO> {
         val listAttributesDTO = mutableMapOf<String, AttributesDTO>()
         for (attribute in attributes) {
             val id = attribute.getId()
@@ -47,7 +58,7 @@ class AttributeService {
         return listAttributesDTO.values.toList()
     }
 
-    fun createAttribute(newAttributeDTO: NewAttributeDTO): AttributeModel {
+    fun createAttribute(newAttributeDTO: NewAttributeDTO): NewAttributeDTO {
         val setStudents = mutableSetOf<StudentModel>()
         newAttributeDTO.studentsId!!.forEach {
             setStudents.add(studentRepository!!.findById(UUID.fromString(it)).get())
@@ -60,6 +71,27 @@ class AttributeService {
             group = groupAttributeModel,
             student = setStudents
         )
-        return attributeRepository!!.save(attributeModel)
+        println("created: $newAttributeDTO")
+        attributeRepository!!.save(attributeModel)
+        return newAttributeDTO
+    }
+
+    fun updateAttribute(newAttributeDTO: NewAttributeDTO): NewAttributeDTO {
+        val setStudents = mutableSetOf<StudentModel>()
+        newAttributeDTO.studentsId!!.forEach {
+            setStudents.add(studentRepository!!.findById(UUID.fromString(it)).get())
+        }
+        val groupAttributeModel = groupAttributesRepository!!.findByName(newAttributeDTO.groupName!!)
+        val attributeModel = attributeRepository!!.findById(UUID.fromString(newAttributeDTO.idAttribute)).get()
+        attributeModel.group = groupAttributeModel
+        attributeModel.name = newAttributeDTO.name
+        attributeModel.student = setStudents
+        attributeRepository!!.save(attributeModel)
+        return newAttributeDTO
+    }
+
+    fun deleteAttribute(attributeIdDTO: AttributeIdDTO): AttributeIdDTO {
+        attributeRepository!!.deleteById(UUID.fromString(attributeIdDTO.idAttribute))
+        return attributeIdDTO
     }
 }

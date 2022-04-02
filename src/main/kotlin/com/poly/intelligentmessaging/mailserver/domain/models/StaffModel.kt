@@ -15,7 +15,7 @@ data class StaffModel(
     @Column(name = "id", updatable = false, nullable = false)
     val id: UUID? = null,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_person", nullable = false)
     val person: PersonModel? = null,
 
@@ -23,7 +23,7 @@ data class StaffModel(
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "mail_auto_forward_map",
         joinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")],
@@ -31,7 +31,7 @@ data class StaffModel(
     )
     val mailVirtualUserModel: Set<MailVirtualUserModel>? = null,
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "role_to_staff",
         joinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")],

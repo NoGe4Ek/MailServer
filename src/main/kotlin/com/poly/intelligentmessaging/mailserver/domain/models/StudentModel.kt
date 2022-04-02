@@ -1,6 +1,5 @@
 package com.poly.intelligentmessaging.mailserver.domain.models
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
 import java.time.LocalDateTime
@@ -15,17 +14,15 @@ data class StudentModel(
     @Column(name = "id", updatable = false, nullable = false)
     val id: UUID? = null,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_person", nullable = false)
     val person: PersonModel? = null,
 
-    @JsonIgnore
     @CreationTimestamp
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @JsonIgnore
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "student_to_attribute",
         joinColumns = [JoinColumn(name = "id_student", referencedColumnName = "id")],
@@ -33,8 +30,7 @@ data class StudentModel(
     )
     val attributes: Set<AttributeModel>? = null,
 
-    @JsonIgnore
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "student_to_filter",
         joinColumns = [JoinColumn(name = "id_student", referencedColumnName = "id")],

@@ -28,4 +28,26 @@ interface GroupAttributesRepository : JpaRepository<GroupAttributesModel, UUID> 
 
 
     fun findByName(name: String): GroupAttributesModel
+
+
+    @Modifying
+    @Query(
+        """
+            select ga.name from group_attributes ga 
+            where cast(ga.id_staff as varchar) = 'ad7a8951-2f95-4619-802b-1285c3279623' 
+            or cast(ga.id_staff as varchar) = ?1
+        """,
+        nativeQuery = true
+    )
+    fun getGroupNames(idStaff: String): MutableList<String>
+
+    @Modifying
+    @Query(
+        """
+            select ga.name from group_attributes ga 
+            where cast(ga.id_staff as varchar) = ?1
+        """,
+        nativeQuery = true
+    )
+    fun getGroupNamesCurrentStaff(idStaff: String): MutableList<String>
 }
