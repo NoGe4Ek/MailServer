@@ -1,6 +1,7 @@
 package com.poly.intelligentmessaging.mailserver.controllers
 
 import com.poly.intelligentmessaging.mailserver.domain.dto.*
+import com.poly.intelligentmessaging.mailserver.domain.projections.GroupNameProjection
 import com.poly.intelligentmessaging.mailserver.services.AttributeService
 import com.poly.intelligentmessaging.mailserver.services.GroupAttributesService
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,12 +39,12 @@ class AttributeController {
     }
 
     @GetMapping("/getGroupNames")
-    fun getGroupNames(): ResponseEntity<List<String>> {
+    fun getGroupNames(): ResponseEntity<MutableList<GroupNameProjection>> {
         return ResponseEntity(groupAttributesService!!.getGroupNames(currentStaff), HttpStatus.OK)
     }
 
     @GetMapping("/getGroupNamesCurrentStaff")
-    fun getGroupNamesCurrentStaff(): ResponseEntity<List<String>> {
+    fun getGroupNamesCurrentStaff(): ResponseEntity<MutableList<GroupNameProjection>> {
         return ResponseEntity(groupAttributesService!!.getGroupNamesCurrentStaff(currentStaff), HttpStatus.OK)
     }
 

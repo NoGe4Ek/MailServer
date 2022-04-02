@@ -4,6 +4,7 @@ import com.poly.intelligentmessaging.mailserver.domain.dto.GroupAttributeDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.GroupAttributeIdDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.GroupAttributeNameDTO
 import com.poly.intelligentmessaging.mailserver.domain.models.GroupAttributesModel
+import com.poly.intelligentmessaging.mailserver.domain.projections.GroupNameProjection
 import com.poly.intelligentmessaging.mailserver.repositories.GroupAttributesRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,11 +34,11 @@ class GroupAttributesService {
         return listResult
     }
 
-    fun getGroupNames(idStaff: String): List<String> {
+    fun getGroupNames(idStaff: String): MutableList<GroupNameProjection> {
         return groupAttributesRepository!!.getGroupNames(idStaff)
     }
 
-    fun getGroupNamesCurrentStaff(idStaff: String): List<String> {
+    fun getGroupNamesCurrentStaff(idStaff: String): MutableList<GroupNameProjection> {
         return groupAttributesRepository!!.getGroupNamesCurrentStaff(idStaff)
     }
 
