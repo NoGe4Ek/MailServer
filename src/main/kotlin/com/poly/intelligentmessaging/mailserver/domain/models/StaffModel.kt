@@ -25,7 +25,15 @@ data class StaffModel(
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_staff")
-    val filter: List<FilterModel>? = null,
+    val filters: Set<FilterModel>? = null,
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_staff")
+    val attributes: Set<AttributeModel>? = null,
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_staff")
+    val groups: Set<GroupAttributesModel>? = null,
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

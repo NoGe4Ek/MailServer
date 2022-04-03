@@ -5,6 +5,7 @@ import com.poly.intelligentmessaging.mailserver.domain.EmailData
 import com.poly.intelligentmessaging.mailserver.domain.dto.FilterIdDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.FiltersDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.NewFilterDTO
+import com.poly.intelligentmessaging.mailserver.domain.dto.ShareDTO
 import com.poly.intelligentmessaging.mailserver.domain.models.EmailModel
 import com.poly.intelligentmessaging.mailserver.domain.models.FilterModel
 import com.poly.intelligentmessaging.mailserver.domain.models.StaffModel
@@ -125,6 +126,38 @@ class FilterService {
         val emailSend = filterModel.emailSend!!
         val emailAuth = EmailAuthenticator(emailSend.email!!, emailSend.password!!)
         emailBox!!.sendEmails(emailAuth, recipient, filterModel.emailAnswer!!.email!!)
+    }
+
+    fun shareFilter(shareDTO: ShareDTO): ShareDTO {
+        val filter = filterRepository!!.findById(UUID.fromString(shareDTO.id)).get()
+        for (staffId in shareDTO.staffIds!!) {
+            val staff = staffRepository!!.findById(UUID.fromString(staffId)).get()
+            val (send, answer) = generateMailData(staff, filter.name!!)
+            val filterModel = FilterModel(
+                staff = staff,
+                emailSend = emailRepository!!.save(
+                    EmailModel(
+                        email = send.email,
+                        password = send.password,
+                        mailDirectory = send.mailDirectory
+                    )
+                ),
+                emailAnswer = emailRepository!!.save(
+                    EmailModel(
+                        email = answer.email,
+                        password = answer.password,
+                        mailDirectory = answer.mailDirectory
+                    )
+                ),
+                name = filter.name,
+                mode = filter.mode,
+                autoForward = filter.autoForward,
+                expression = filter.expression,
+                students = filter.students
+            )
+            filterRepository!!.save(filterModel)
+        }
+        return shareDTO
     }
 
     private fun generateMailData(staff: StaffModel, filterName: String): Pair<EmailData, EmailData> {

@@ -3,7 +3,9 @@ package com.poly.intelligentmessaging.mailserver.services
 import com.poly.intelligentmessaging.mailserver.domain.dto.AttributeIdDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.AttributesDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.NewAttributeDTO
+import com.poly.intelligentmessaging.mailserver.domain.dto.ShareDTO
 import com.poly.intelligentmessaging.mailserver.domain.models.AttributeModel
+import com.poly.intelligentmessaging.mailserver.domain.models.GroupAttributesModel
 import com.poly.intelligentmessaging.mailserver.domain.models.StudentModel
 import com.poly.intelligentmessaging.mailserver.domain.projections.AttributeProjection
 import com.poly.intelligentmessaging.mailserver.repositories.AttributeRepository
@@ -93,5 +95,25 @@ class AttributeService {
     fun deleteAttribute(attributeIdDTO: AttributeIdDTO): AttributeIdDTO {
         attributeRepository!!.deleteById(UUID.fromString(attributeIdDTO.idAttribute))
         return attributeIdDTO
+    }
+
+    fun shareAttribute(shareDTO: ShareDTO): ShareDTO {
+        val attribute = attributeRepository!!.findById(UUID.fromString(shareDTO.id)).get()
+        for (staffId in shareDTO.staffIds!!) {
+            val staff = staffRepository!!.findById(UUID.fromString(staffId)).get()
+            val groupReference = attribute.group!!
+            val group = staff.groups!!.find { it.name == groupReference.name }
+            val attributeModel = AttributeModel(
+                staff = staff,
+                group = group ?: groupAttributesRepository!!.save(
+                    GroupAttributesModel(staff = staff, name = groupReference.name)
+                ),
+                name = attribute.name,
+                expression = attribute.expression,
+                student = attribute.student
+            )
+            attributeRepository!!.save(attributeModel)
+        }
+        return shareDTO
     }
 }

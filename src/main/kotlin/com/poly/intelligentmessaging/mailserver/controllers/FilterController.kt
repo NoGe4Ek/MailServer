@@ -3,6 +3,7 @@ package com.poly.intelligentmessaging.mailserver.controllers
 import com.poly.intelligentmessaging.mailserver.domain.dto.FilterIdDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.FiltersDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.NewFilterDTO
+import com.poly.intelligentmessaging.mailserver.domain.dto.ShareDTO
 import com.poly.intelligentmessaging.mailserver.services.FilterService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -47,5 +48,10 @@ class FilterController {
     @PostMapping("/getEmails", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getEmails(@RequestBody filterIdDTO: FilterIdDTO): ResponseEntity<FilterIdDTO> {
         return ResponseEntity(filterService!!.getEmails(filterIdDTO), HttpStatus.OK)
+    }
+
+    @PostMapping("/share", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun shareFilter(@RequestBody shareDTO: ShareDTO): ResponseEntity<ShareDTO> {
+        return ResponseEntity(filterService!!.shareFilter(shareDTO), HttpStatus.OK)
     }
 }

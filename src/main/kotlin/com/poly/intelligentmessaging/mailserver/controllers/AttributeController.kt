@@ -75,4 +75,9 @@ class AttributeController {
     fun deleteGroupAttribute(@RequestBody groupAttributeIdDTO: GroupAttributeIdDTO): ResponseEntity<GroupAttributeIdDTO> {
         return ResponseEntity(groupAttributesService!!.deleteGroupAttribute(groupAttributeIdDTO), HttpStatus.OK)
     }
+
+    @PostMapping("/share", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun shareAttribute(@RequestBody shareDTO: ShareDTO): ResponseEntity<ShareDTO> {
+        return ResponseEntity(attributesService!!.shareAttribute(shareDTO), HttpStatus.OK)
+    }
 }
