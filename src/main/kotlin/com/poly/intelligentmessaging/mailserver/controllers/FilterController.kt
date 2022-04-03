@@ -21,7 +21,7 @@ class FilterController {
 
     @GetMapping("/getFilters")
     fun getFilters(): ResponseEntity<List<FiltersDTO>> {
-        return ResponseEntity(filterService!!.getFilters(currentStaff, true), HttpStatus.OK)
+        return ResponseEntity(filterService!!.getFilters(currentStaff, false), HttpStatus.OK)
     }
 
     @GetMapping("/getFiltersShort")

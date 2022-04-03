@@ -46,7 +46,7 @@ data class FilterModel(
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
+    @ManyToMany(fetch = FetchType.EAGER, cascade = [CascadeType.DETACH])
     @JoinTable(
         name = "student_to_filter",
         joinColumns = [JoinColumn(name = "id_filter", referencedColumnName = "id")],
@@ -75,5 +75,4 @@ data class FilterModel(
                 "created = $created " +
                 ")"
     }
-
 }

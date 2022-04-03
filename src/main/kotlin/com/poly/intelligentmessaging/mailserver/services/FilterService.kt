@@ -112,7 +112,19 @@ class FilterService {
     }
 
     fun getEmails(filterIdDTO: FilterIdDTO): FilterIdDTO {
+        val filterModel = filterRepository!!.findById(UUID.fromString(filterIdDTO.idFilter)).get()
+        val emailAnswer = filterModel.emailAnswer!!
+        val staffEmail = filterModel.staff!!.person!!.email!!
+        val emailAuth = EmailAuthenticator(emailAnswer.email!!, emailAnswer.password!!)
+        emailBox!!.getEmails(emailAuth, setOf(staffEmail))
         return filterIdDTO
+    }
+
+    fun sendEmails(filterModel: FilterModel) {
+        val recipient = filterModel.students!!.associateWith { it.person!!.email!! }.values.toSet()
+        val emailSend = filterModel.emailSend!!
+        val emailAuth = EmailAuthenticator(emailSend.email!!, emailSend.password!!)
+        emailBox!!.sendEmails(emailAuth, recipient, filterModel.emailAnswer!!.email!!)
     }
 
     private fun generateMailData(staff: StaffModel, filterName: String): Pair<EmailData, EmailData> {
@@ -120,7 +132,7 @@ class FilterService {
         val nameSend = "f" + (staff.id.toString() + filterName).hashCode().toString() + "_s"
         val nameAnswer = "f" + (staff.id.toString() + filterName).hashCode().toString() + "_a"
         val send = EmailData(nameSend + domain, staff.id.toString() + "_s", "/$nameSend")
-        val answer = EmailData(nameAnswer + domain, staff.id.toString() + "a", "/$nameSend")
+        val answer = EmailData(nameAnswer + domain, staff.id.toString() + "a", "/$nameAnswer")
         return send to answer
     }
 
