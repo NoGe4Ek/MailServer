@@ -91,17 +91,47 @@ VALUES ('33067576-4164-492a-a2f7-908831aeb240', 'd159c111-18cd-4413-a69c-2dc67b2
 INSERT INTO student_to_attribute
 VALUES ('33067576-4164-492a-a2f7-908831aeb240', 'da45efeb-ac57-447b-b062-4c500d2675fa');
 
+INSERT INTO email
+VALUES ('5a146b72-00aa-4b88-95de-8bd20ff9179f',
+        'filter1_send@poly-sender.ru',
+        'thisisfilter1',
+        '/filter1-send');
+
+INSERT INTO email
+VALUES ('43976846-fa85-4632-9f1e-405ae134ba75',
+        'filter1_answer@poly-sender.ru',
+        'thisisfilter1',
+        '/filter1-answer');
+
+INSERT INTO email
+VALUES ('59fc5c05-ab5d-4c15-a790-53185b4c3370',
+        'filter2_send@poly-sender.ru',
+        'thisisfilter2',
+        '/filter2-send');
+
+INSERT INTO email
+VALUES ('0a6fb05e-087d-47f6-890a-6abd4b1f5f89',
+        'filter2_answer@poly-sender.ru',
+        'thisisfilter2',
+        '/filter2-answer');
+
 INSERT INTO filter
 VALUES ('59cbc294-c52d-43b1-831d-66b1a4d04047',
-        '9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b',
-        'filter1@poly-sender.ru',
-        'filter1');
+        '725cee0f-7a95-4094-b19a-11b27f779490',
+        '5a146b72-00aa-4b88-95de-8bd20ff9179f',
+        '43976846-fa85-4632-9f1e-405ae134ba75',
+        'filter1',
+        'manual',
+        false);
 
 INSERT INTO filter
 VALUES ('4312bd25-aa7a-4924-ad39-e3ed997d9054',
         '725cee0f-7a95-4094-b19a-11b27f779490',
-        'filter2@poly-sender.ru',
-        'filter2');
+        '59fc5c05-ab5d-4c15-a790-53185b4c3370',
+        '0a6fb05e-087d-47f6-890a-6abd4b1f5f89',
+        'filter2',
+        'auto',
+        true);
 
 INSERT INTO student_to_filter
 VALUES ('8ff93425-b708-4f63-9792-91814ea2a2de',
@@ -118,22 +148,3 @@ VALUES ('33067576-4164-492a-a2f7-908831aeb240',
 INSERT INTO student_to_filter
 VALUES ('33067576-4164-492a-a2f7-908831aeb240',
         '4312bd25-aa7a-4924-ad39-e3ed997d9054');
-
-INSERT INTO mail_virtual_user
-VALUES ('2a3bc6f6-7ba0-41cf-a278-3f39b4c9ad91',
-        '59cbc294-c52d-43b1-831d-66b1a4d04047',
-        '9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b',
-        'filter1@poly-sender.ru',
-        '{plain}thisisfilter1',
-        '/filter1');
-
-INSERT INTO mail_virtual_user
-VALUES ('6b36ab78-f3ee-4408-8d2a-bd511a4365c9',
-        '4312bd25-aa7a-4924-ad39-e3ed997d9054',
-        '725cee0f-7a95-4094-b19a-11b27f779490',
-        'filter2@poly-sender.ru',
-        '{plain}thisisfilter2',
-        '/filter2');
-
-INSERT INTO mail_auto_forward_map
-VALUES ('725cee0f-7a95-4094-b19a-11b27f779490', '6b36ab78-f3ee-4408-8d2a-bd511a4365c9');

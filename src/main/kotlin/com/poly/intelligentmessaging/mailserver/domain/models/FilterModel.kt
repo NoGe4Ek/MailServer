@@ -15,17 +15,29 @@ data class FilterModel(
     @Column(name = "id", updatable = false, nullable = false)
     val id: UUID? = null,
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
     @JoinColumn(name = "id_staff", nullable = false)
     val staff: StaffModel? = null,
 
-    @Column(name = "email")
-    @NonNull
-    val email: String? = null,
+    @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+    @JoinColumn(name = "id_email_send")
+    val emailSend: EmailModel? = null,
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+    @JoinColumn(name = "id_email_answer")
+    val emailAnswer: EmailModel? = null,
 
     @Column(name = "name")
     @NonNull
-    val name: String? = null,
+    var name: String? = null,
+
+    @Column(name = "mode")
+    @NonNull
+    var mode: String? = null,
+
+    @Column(name = "auto_forward")
+    @NonNull
+    var autoForward: Boolean? = null,
 
     @Column(name = "expression")
     val expression: String? = null,
@@ -34,16 +46,13 @@ data class FilterModel(
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
     @JoinTable(
         name = "student_to_filter",
         joinColumns = [JoinColumn(name = "id_filter", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "id_student", referencedColumnName = "id")]
     )
-    val student: Set<StudentModel>? = null,
-
-    @OneToMany
-    val virtualUser: Set<MailVirtualUserModel>? = null
+    var students: Set<StudentModel>? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -59,11 +68,12 @@ data class FilterModel(
     override fun toString(): String {
         return this::class.simpleName + "(" +
                 "id = $id , " +
-                "staff = $staff , " +
-                "email = $email , " +
                 "name = $name , " +
+                "mode = $mode , " +
+                "autoForward = $autoForward , " +
                 "expression = $expression , " +
                 "created = $created " +
                 ")"
     }
+
 }

@@ -23,13 +23,9 @@ data class StaffModel(
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "mail_auto_forward_map",
-        joinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")],
-        inverseJoinColumns = [JoinColumn(name = "id_virtual_user", referencedColumnName = "id")]
-    )
-    val mailVirtualUserModel: Set<MailVirtualUserModel>? = null,
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_staff")
+    val filter: List<FilterModel>? = null,
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
