@@ -18,6 +18,7 @@ import com.poly.intelligentmessaging.mailserver.util.EmailAuthenticator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.random.Random
 
 @Service
 class FilterService {
@@ -133,6 +134,8 @@ class FilterService {
         for (staffId in shareDTO.staffIds!!) {
             val staff = staffRepository!!.findById(UUID.fromString(staffId)).get()
             val (send, answer) = generateMailData(staff, filter.name!!)
+            val students = mutableSetOf<StudentModel>()
+            filter.students!!.forEach { students.add(it) }
             val filterModel = FilterModel(
                 staff = staff,
                 emailSend = emailRepository!!.save(
@@ -153,7 +156,7 @@ class FilterService {
                 mode = filter.mode,
                 autoForward = filter.autoForward,
                 expression = filter.expression,
-                students = filter.students
+                students = students
             )
             filterRepository!!.save(filterModel)
         }
@@ -162,8 +165,8 @@ class FilterService {
 
     private fun generateMailData(staff: StaffModel, filterName: String): Pair<EmailData, EmailData> {
         val domain = "@poly-sender.ru"
-        val nameSend = "f" + (staff.id.toString() + filterName).hashCode().toString() + "_s"
-        val nameAnswer = "f" + (staff.id.toString() + filterName).hashCode().toString() + "_a"
+        val nameSend = "f" + (staff.id.toString() + filterName + Random.nextInt(15000)).hashCode().toString() + "_s"
+        val nameAnswer = "f" + (staff.id.toString() + filterName + Random.nextInt(15000)).hashCode().toString() + "_a"
         val send = EmailData(nameSend + domain, staff.id.toString() + "_s", "/$nameSend")
         val answer = EmailData(nameAnswer + domain, staff.id.toString() + "a", "/$nameAnswer")
         return send to answer

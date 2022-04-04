@@ -11,12 +11,14 @@ class StaffService {
     @Autowired
     val staffRepository: StaffRepository? = null
 
-    fun getStaff(): MutableList<StaffDTO> {
+    fun getStaff(currentStaff: String, basicStaff: String): MutableList<StaffDTO> {
         val listStaffDTO = mutableListOf<StaffDTO>()
         val listStaffModel = staffRepository!!.findAll()
         listStaffModel.forEach { staff ->
-            val fullName = "${staff.person!!.lastName} ${staff.person.firstName} ${staff.person.patronymic}"
-            listStaffDTO.add(StaffDTO(staff.id.toString(), fullName))
+            if (staff.id.toString() != currentStaff && staff.id.toString() != basicStaff) {
+                val fullName = "${staff.person!!.lastName} ${staff.person.firstName} ${staff.person.patronymic}"
+                listStaffDTO.add(StaffDTO(staff.id.toString(), fullName))
+            }
         }
         return listStaffDTO
     }

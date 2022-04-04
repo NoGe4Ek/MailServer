@@ -102,6 +102,8 @@ class AttributeService {
         for (staffId in shareDTO.staffIds!!) {
             val staff = staffRepository!!.findById(UUID.fromString(staffId)).get()
             val groupReference = attribute.group!!
+            val students = mutableSetOf<StudentModel>()
+            attribute.student!!.forEach { students.add(it) }
             val group = staff.groups!!.find { it.name == groupReference.name }
             val attributeModel = AttributeModel(
                 staff = staff,
@@ -110,7 +112,7 @@ class AttributeService {
                 ),
                 name = attribute.name,
                 expression = attribute.expression,
-                student = attribute.student
+                student = students
             )
             attributeRepository!!.save(attributeModel)
         }
