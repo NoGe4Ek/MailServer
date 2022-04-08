@@ -165,8 +165,8 @@ class FilterService {
 
     private fun generateMailData(staff: StaffModel, filterName: String): Pair<EmailData, EmailData> {
         val domain = "@poly-sender.ru"
-        val nameSend = "f" + (staff.id.toString() + filterName + Random.nextInt(15000)).hashCode().toString() + "_s"
-        val nameAnswer = "f" + (staff.id.toString() + filterName + Random.nextInt(15000)).hashCode().toString() + "_a"
+        val nameSend = "f" + (staff.id.toString() + filterName + Random.nextInt(10)).hashCode().toString() + "_s"
+        val nameAnswer = "f" + (staff.id.toString() + filterName + Random.nextInt(10)).hashCode().toString() + "_a"
         val send = EmailData(nameSend + domain, staff.id.toString() + "_s", "/$nameSend")
         val answer = EmailData(nameAnswer + domain, staff.id.toString() + "a", "/$nameAnswer")
         return send to answer

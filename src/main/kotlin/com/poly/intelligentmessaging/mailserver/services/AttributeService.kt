@@ -1,9 +1,7 @@
 package com.poly.intelligentmessaging.mailserver.services
 
-import com.poly.intelligentmessaging.mailserver.domain.dto.AttributeIdDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.AttributesDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.NewAttributeDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.ShareDTO
+import com.poly.intelligentmessaging.mailserver.components.DSLHandler
+import com.poly.intelligentmessaging.mailserver.domain.dto.*
 import com.poly.intelligentmessaging.mailserver.domain.models.AttributeModel
 import com.poly.intelligentmessaging.mailserver.domain.models.GroupAttributesModel
 import com.poly.intelligentmessaging.mailserver.domain.models.StudentModel
@@ -20,16 +18,19 @@ import java.util.*
 class AttributeService {
 
     @Autowired
-    val attributeRepository: AttributeRepository? = null
+    private val attributeRepository: AttributeRepository? = null
 
     @Autowired
-    val studentRepository: StudentRepository? = null
+    private val studentRepository: StudentRepository? = null
 
     @Autowired
-    val groupAttributesRepository: GroupAttributesRepository? = null
+    private val groupAttributesRepository: GroupAttributesRepository? = null
 
     @Autowired
-    val staffRepository: StaffRepository? = null
+    private val staffRepository: StaffRepository? = null
+
+    @Autowired
+    private val dslHandler: DSLHandler? = null
 
     fun getAttributes(idStaff: String): List<AttributesDTO> {
         val attributes = attributeRepository!!.getAttributes(idStaff)
@@ -88,7 +89,7 @@ class AttributeService {
         attributeModel.group = groupAttributeModel
         attributeModel.name = newAttributeDTO.name
         attributeModel.student = setStudents
-        attributeRepository!!.save(attributeModel)
+        attributeRepository.save(attributeModel)
         return newAttributeDTO
     }
 
@@ -114,8 +115,15 @@ class AttributeService {
                 expression = attribute.expression,
                 student = students
             )
-            attributeRepository!!.save(attributeModel)
+            attributeRepository.save(attributeModel)
         }
         return shareDTO
+    }
+
+    fun createAttributeFromExpression(expressionDTO: ExpressionDTO): MutableSet<String> {
+        val students = dslHandler!!.getStudentsByExpression(expressionDTO.expression!!)
+        val set = mutableSetOf<String>()
+        students.forEach { set.add(it.person!!.email!!) }
+        return set
     }
 }

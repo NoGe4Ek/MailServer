@@ -13,6 +13,9 @@ VALUES ('9a60d81c-916d-4d03-b5ab-1809d13ad268', 'Student1', 'Student1', 'Student
 INSERT INTO person
 VALUES ('ce00ac40-791c-48ad-abf1-b0be560043a2', 'Student2', 'Student2', 'Student2', 'tarasenko.ns@edu.spbstu.ru');
 
+INSERT INTO person
+VALUES ('3a00ac40-791c-48ad-abf1-b0be560043a2', 'Student3', 'Student3', 'Student3', 'tarasenko.es@edu.spbstu.ru');
+
 INSERT INTO staff
 VALUES ('ad7a8951-2f95-4619-802b-1285c3279623', '887f38df-9e1f-407f-b82d-c28ceddc92ed');
 
@@ -73,6 +76,10 @@ INSERT INTO student
 VALUES ('33067576-4164-492a-a2f7-908831aeb240',
         'ce00ac40-791c-48ad-abf1-b0be560043a2');
 
+INSERT INTO student
+VALUES ('41066575-4361-452a-b2f7-908831aeb240',
+        '3a00ac40-791c-48ad-abf1-b0be560043a2');
+
 INSERT INTO student_to_attribute
 VALUES ('8ff93425-b708-4f63-9792-91814ea2a2de', '1cdf23fc-6a1d-4648-9c4f-a0f13ac8c60b');
 INSERT INTO student_to_attribute
@@ -90,6 +97,15 @@ INSERT INTO student_to_attribute
 VALUES ('33067576-4164-492a-a2f7-908831aeb240', 'd159c111-18cd-4413-a69c-2dc67b2bb7be');
 INSERT INTO student_to_attribute
 VALUES ('33067576-4164-492a-a2f7-908831aeb240', 'da45efeb-ac57-447b-b062-4c500d2675fa');
+
+INSERT INTO student_to_attribute
+VALUES ('41066575-4361-452a-b2f7-908831aeb240', '1cdf23fc-6a1d-4648-9c4f-a0f13ac8c60b');
+INSERT INTO student_to_attribute
+VALUES ('41066575-4361-452a-b2f7-908831aeb240', 'eddbd202-c79a-45de-9d84-4de8f93fcb04');
+INSERT INTO student_to_attribute
+VALUES ('41066575-4361-452a-b2f7-908831aeb240', 'd159c111-18cd-4413-a69c-2dc67b2bb7be');
+INSERT INTO student_to_attribute
+VALUES ('41066575-4361-452a-b2f7-908831aeb240', 'da45efeb-ac57-447b-b062-4c500d2675fa');
 
 INSERT INTO email
 VALUES ('5a146b72-00aa-4b88-95de-8bd20ff9179f',

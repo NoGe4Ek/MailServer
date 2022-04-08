@@ -92,7 +92,7 @@ CREATE TABLE attribute
 (
     id                 UUID PRIMARY KEY,
     id_staff           UUID        NOT NULL,
-    id_group_attribute UUID        NOT NULL,
+    id_group_attribute UUID,
     name               TEXT        NOT NULL,
     expression         TEXT,
     created            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
