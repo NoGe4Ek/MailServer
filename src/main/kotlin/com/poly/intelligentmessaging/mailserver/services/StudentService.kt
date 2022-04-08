@@ -12,9 +12,9 @@ class StudentService {
     @Autowired
     var studentRepository: StudentRepository? = null
 
-    fun getAllStudents(): List<StudentsDTO> {
+    fun getAllStudents(idStaff: String): List<StudentsDTO> {
         val listStudentsDTO = mutableMapOf<String, StudentsDTO>()
-        val students = studentRepository!!.findAllStudents()
+        val students = studentRepository!!.findAllStudents(idStaff)
 
         for (student in students) {
             val studentId = student.getId()

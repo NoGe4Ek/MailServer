@@ -22,6 +22,6 @@ private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
 
     @GetMapping("/getAll")
     fun getAllStudents(): ResponseEntity<List<StudentsDTO>> {
-        return ResponseEntity(studentService!!.getAllStudents(), HttpStatus.OK)
+        return ResponseEntity(studentService!!.getAllStudents(currentStaff), HttpStatus.OK)
     }
 }

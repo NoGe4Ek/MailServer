@@ -21,11 +21,13 @@ interface GroupAttributesRepository : JpaRepository<GroupAttributesModel, UUID> 
                 string_agg(a.name, '|') as attributes
             from group_attributes ga
             inner join attribute a on ga.id = a.id_group_attribute
+            where cast(ga.id_staff as varchar) = 'ad7a8951-2f95-4619-802b-1285c3279623' 
+            or cast(ga.id_staff as varchar) = ?1
             group by ga.name, ga.id;
         """,
         nativeQuery = true
     )
-    fun getGroupAttributes(): MutableList<GroupAttributeProjection>
+    fun getGroupAttributes(idStaff: String): MutableList<GroupAttributeProjection>
 
 
     fun findByName(name: String): GroupAttributesModel

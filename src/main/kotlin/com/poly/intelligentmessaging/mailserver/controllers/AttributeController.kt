@@ -25,7 +25,7 @@ private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
 
     @GetMapping("/getGroupAttributes")
     fun getGroupAttributes(): ResponseEntity<MutableList<GroupAttributeDTO>> {
-        return ResponseEntity(groupAttributesService!!.getGroupAttributes(), HttpStatus.OK)
+        return ResponseEntity(groupAttributesService!!.getGroupAttributes(currentStaff), HttpStatus.OK)
     }
 
     @GetMapping("/getAttributes")
