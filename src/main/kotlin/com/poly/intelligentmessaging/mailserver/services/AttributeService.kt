@@ -32,6 +32,8 @@ class AttributeService {
     @Autowired
     private val dslHandler: DSLHandler? = null
 
+    private val basicIdStaff = "ad7a8951-2f95-4619-802b-1285c3279623"
+
     fun getAttributes(idStaff: String): List<AttributesDTO> {
         val attributes = attributeRepository!!.getAttributes(idStaff)
         return attributesConvertToDTO(attributes)
@@ -61,18 +63,19 @@ class AttributeService {
         return listAttributesDTO.values.toList()
     }
 
-    fun createAttribute(newAttributeDTO: NewAttributeDTO): NewAttributeDTO {
-        val setStudents = mutableSetOf<StudentModel>()
+    fun createAttribute(newAttributeDTO: NewAttributeDTO, idStaff: String): NewAttributeDTO {
+        val students = mutableSetOf<StudentModel>()
         newAttributeDTO.studentsId!!.forEach {
-            setStudents.add(studentRepository!!.findById(UUID.fromString(it)).get())
+            students.add(studentRepository!!.findById(UUID.fromString(it)).get())
         }
         val groupAttributeModel = groupAttributesRepository!!.findByName(newAttributeDTO.groupName!!)
-        val staff = staffRepository!!.findById(UUID.fromString("725cee0f-7a95-4094-b19a-11b27f779490")).get()
+        val staff = staffRepository!!.findById(UUID.fromString(idStaff)).get()
         val attributeModel = AttributeModel(
             staff = staff,
             name = newAttributeDTO.name,
+            expression = if (newAttributeDTO.expression == "") null else newAttributeDTO.expression,
             group = groupAttributeModel,
-            student = setStudents
+            students = students
         )
         println("created: $newAttributeDTO")
         attributeRepository!!.save(attributeModel)
@@ -88,7 +91,8 @@ class AttributeService {
         val attributeModel = attributeRepository!!.findById(UUID.fromString(newAttributeDTO.idAttribute)).get()
         attributeModel.group = groupAttributeModel
         attributeModel.name = newAttributeDTO.name
-        attributeModel.student = setStudents
+        attributeModel.expression = if (newAttributeDTO.expression == "") null else newAttributeDTO.expression
+        attributeModel.students = setStudents
         attributeRepository.save(attributeModel)
         return newAttributeDTO
     }
@@ -104,7 +108,7 @@ class AttributeService {
             val staff = staffRepository!!.findById(UUID.fromString(staffId)).get()
             val groupReference = attribute.group!!
             val students = mutableSetOf<StudentModel>()
-            attribute.student!!.forEach { students.add(it) }
+            attribute.students!!.forEach { students.add(it) }
             val group = staff.groups!!.find { it.name == groupReference.name }
             val attributeModel = AttributeModel(
                 staff = staff,
@@ -113,17 +117,14 @@ class AttributeService {
                 ),
                 name = attribute.name,
                 expression = attribute.expression,
-                student = students
+                students = students
             )
             attributeRepository.save(attributeModel)
         }
         return shareDTO
     }
 
-    fun createAttributeFromExpression(expressionDTO: ExpressionDTO): MutableSet<String> {
-        val students = dslHandler!!.getStudentsByExpression(expressionDTO.expression!!)
-        val set = mutableSetOf<String>()
-        students.forEach { set.add(it.person!!.email!!) }
-        return set
+    fun calculateExpression(expressionDTO: ExpressionDTO, currentIdStaff: String): ComputedExpressionDTO {
+        return dslHandler!!.getComputedExpression(expressionDTO.expression!!, currentIdStaff, basicIdStaff)
     }
 }

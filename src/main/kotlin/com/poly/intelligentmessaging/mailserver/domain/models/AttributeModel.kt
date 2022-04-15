@@ -28,19 +28,19 @@ data class AttributeModel(
     var name: String? = null,
 
     @Column(name = "expression")
-    val expression: String? = null,
+    var expression: String? = null,
 
     @CreationTimestamp
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
+    @ManyToMany(fetch = FetchType.EAGER, cascade = [CascadeType.DETACH])
     @JoinTable(
         name = "student_to_attribute",
         joinColumns = [JoinColumn(name = "id_attribute", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "id_student", referencedColumnName = "id")]
     )
-    var student: Set<StudentModel>? = null,
+    var students: Set<StudentModel>? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

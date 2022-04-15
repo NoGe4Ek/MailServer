@@ -25,7 +25,7 @@ data class GroupAttributesModel(
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.REMOVE])
     @JoinColumn(name = "id_group_attribute")
     val attributes: Set<AttributeModel>? = null,
 ) {

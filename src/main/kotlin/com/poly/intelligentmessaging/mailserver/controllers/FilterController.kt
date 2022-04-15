@@ -1,9 +1,6 @@
 package com.poly.intelligentmessaging.mailserver.controllers
 
-import com.poly.intelligentmessaging.mailserver.domain.dto.FilterIdDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.FiltersDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.NewFilterDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.ShareDTO
+import com.poly.intelligentmessaging.mailserver.domain.dto.*
 import com.poly.intelligentmessaging.mailserver.services.FilterService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -15,8 +12,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/filters")
 class FilterController {
 
-//    private val currentStaff = "9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b"
-private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
+    //    private val currentStaff = "9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b"
+    private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
 
     @Autowired
     val filterService: FilterService? = null
@@ -54,5 +51,10 @@ private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
     @PostMapping("/share", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun shareFilter(@RequestBody shareDTO: ShareDTO): ResponseEntity<ShareDTO> {
         return ResponseEntity(filterService!!.shareFilter(shareDTO), HttpStatus.OK)
+    }
+
+    @PostMapping("/calculate", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun calculate(@RequestBody expressionDTO: ExpressionDTO): ResponseEntity<ComputedExpressionDTO> {
+        return ResponseEntity(filterService!!.calculateExpression(expressionDTO, currentStaff), HttpStatus.OK)
     }
 }

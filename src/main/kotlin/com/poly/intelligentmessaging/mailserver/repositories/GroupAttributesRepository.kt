@@ -1,6 +1,7 @@
 package com.poly.intelligentmessaging.mailserver.repositories
 
 import com.poly.intelligentmessaging.mailserver.domain.models.GroupAttributesModel
+import com.poly.intelligentmessaging.mailserver.domain.models.StaffModel
 import com.poly.intelligentmessaging.mailserver.domain.projections.GroupAttributeProjection
 import com.poly.intelligentmessaging.mailserver.domain.projections.GroupNameProjection
 import org.springframework.data.jpa.repository.JpaRepository
@@ -32,6 +33,7 @@ interface GroupAttributesRepository : JpaRepository<GroupAttributesModel, UUID> 
 
     fun findByName(name: String): GroupAttributesModel
 
+    fun findAllByStaffOrStaff(currentStaff: StaffModel, basicStaff: StaffModel): Set<GroupAttributesModel>
 
     @Modifying
     @Query(

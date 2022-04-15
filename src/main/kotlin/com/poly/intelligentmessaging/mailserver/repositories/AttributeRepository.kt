@@ -51,6 +51,4 @@ interface AttributeRepository : JpaRepository<AttributeModel, UUID> {
         nativeQuery = true
     )
     fun getAttributesCurrentStaff(idStaff: String): MutableList<AttributeProjection>
-
-
 }

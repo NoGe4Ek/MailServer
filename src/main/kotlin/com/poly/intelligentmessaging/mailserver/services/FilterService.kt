@@ -1,11 +1,9 @@
 package com.poly.intelligentmessaging.mailserver.services
 
+import com.poly.intelligentmessaging.mailserver.components.DSLHandler
 import com.poly.intelligentmessaging.mailserver.components.EmailBox
 import com.poly.intelligentmessaging.mailserver.domain.EmailData
-import com.poly.intelligentmessaging.mailserver.domain.dto.FilterIdDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.FiltersDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.NewFilterDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.ShareDTO
+import com.poly.intelligentmessaging.mailserver.domain.dto.*
 import com.poly.intelligentmessaging.mailserver.domain.models.EmailModel
 import com.poly.intelligentmessaging.mailserver.domain.models.FilterModel
 import com.poly.intelligentmessaging.mailserver.domain.models.StaffModel
@@ -24,19 +22,24 @@ import kotlin.random.Random
 class FilterService {
 
     @Autowired
-    val filterRepository: FilterRepository? = null
+    private val filterRepository: FilterRepository? = null
 
     @Autowired
-    val studentRepository: StudentRepository? = null
+    private val studentRepository: StudentRepository? = null
 
     @Autowired
-    val staffRepository: StaffRepository? = null
+    private val staffRepository: StaffRepository? = null
 
     @Autowired
-    val emailRepository: EmailRepository? = null
+    private val emailRepository: EmailRepository? = null
 
     @Autowired
-    val emailBox: EmailBox? = null
+    private val emailBox: EmailBox? = null
+
+    @Autowired
+    private val dslHandler: DSLHandler? = null
+
+    private val basicIdStaff = "ad7a8951-2f95-4619-802b-1285c3279623"
 
     fun getFilters(idStaff: String, isShort: Boolean): List<FiltersDTO> {
         val listFiltersDTO = mutableMapOf<String, FiltersDTO>()
@@ -83,8 +86,9 @@ class FilterService {
         val filter = FilterModel(
             staff = staff,
             emailSend = emailRepository!!.save(emailSend),
-            emailAnswer = emailRepository!!.save(emailAnswer),
+            emailAnswer = emailRepository.save(emailAnswer),
             name = newFilterDTO.name,
+            expression = if (newFilterDTO.expression == "") null else newFilterDTO.expression,
             mode = newFilterDTO.mailOption,
             autoForward = newFilterDTO.mailOption == "auto",
             students = students
@@ -102,9 +106,10 @@ class FilterService {
         val filter = filterRepository!!.findById(UUID.fromString(newFilterDTO.idFilter)).get()
         filter.name = newFilterDTO.name
         filter.mode = newFilterDTO.mailOption
+        filter.expression = if (newFilterDTO.expression == "") null else newFilterDTO.expression
         filter.autoForward = newFilterDTO.mailOption == "auto"
         filter.students = students
-        filterRepository!!.save(filter)
+        filterRepository.save(filter)
         return newFilterDTO
     }
 
@@ -145,7 +150,7 @@ class FilterService {
                         mailDirectory = send.mailDirectory
                     )
                 ),
-                emailAnswer = emailRepository!!.save(
+                emailAnswer = emailRepository.save(
                     EmailModel(
                         email = answer.email,
                         password = answer.password,
@@ -158,9 +163,13 @@ class FilterService {
                 expression = filter.expression,
                 students = students
             )
-            filterRepository!!.save(filterModel)
+            filterRepository.save(filterModel)
         }
         return shareDTO
+    }
+
+    fun calculateExpression(expressionDTO: ExpressionDTO, currentIdStaff: String): ComputedExpressionDTO {
+        return dslHandler!!.getComputedExpression(expressionDTO.expression!!, currentIdStaff, basicIdStaff)
     }
 
     private fun generateMailData(staff: StaffModel, filterName: String): Pair<EmailData, EmailData> {

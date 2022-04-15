@@ -1,6 +1,12 @@
 package com.poly.intelligentmessaging.mailserver.components
 
+import com.poly.intelligentmessaging.mailserver.domain.dto.ComputedExpressionDTO
+import com.poly.intelligentmessaging.mailserver.domain.dto.StudentsDTO
+import com.poly.intelligentmessaging.mailserver.domain.models.GroupAttributesModel
 import com.poly.intelligentmessaging.mailserver.domain.models.StudentModel
+import com.poly.intelligentmessaging.mailserver.exceptions.ValidationException
+import com.poly.intelligentmessaging.mailserver.repositories.GroupAttributesRepository
+import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StudentRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -12,30 +18,56 @@ class DSLHandler {
     @Autowired
     private val studentRepository: StudentRepository? = null
 
-    fun getStudentsByExpression(expression: String): Set<StudentModel> {
-        val (rpn, functionCounter) = toRPN(expression)
-        return calculateRPN(rpn, functionCounter)
+    @Autowired
+    private val staffRepository: StaffRepository? = null
+
+    @Autowired
+    private val groupAttributesRepository: GroupAttributesRepository? = null
+
+    fun getComputedExpression(expression: String, currentIdStaff: String, basicIdStaff: String): ComputedExpressionDTO {
+        val currentStaff = staffRepository!!.findById(UUID.fromString(currentIdStaff)).get()
+        val basicStaff = staffRepository.findById(UUID.fromString(basicIdStaff)).get()
+        val groupAttributes = groupAttributesRepository!!.findAllByStaffOrStaff(currentStaff, basicStaff)
+        val (status, students) = calculateExpression(expression, groupAttributes)
+        val studentsDTO = mutableSetOf<StudentsDTO>()
+        for (student in students) {
+            val person = student.person!!
+            val fullName = "${person.lastName} ${person.firstName} ${person.patronymic}"
+            studentsDTO.add(StudentsDTO(student.id.toString(), fullName, person.email!!))
+        }
+        return ComputedExpressionDTO(status, studentsDTO)
     }
 
-    private fun calculateRPN(rpn: List<String>, functionCounter: Int): Set<StudentModel> {
+    private fun calculateExpression(
+        expression: String,
+        groupAttributes: Set<GroupAttributesModel>
+    ): Pair<String, Set<StudentModel>> {
+        return try {
+            val expressionWithoutSpace = expression.replace(Regex("""\s+"""), "")
+            validationExpression(expressionWithoutSpace, groupAttributes)
+            val rpn = toRPN(expressionWithoutSpace)
+            val result = calculateRPN(rpn)
+            val status = if (result.isEmpty()) "warning" else "success"
+            status to result
+        } catch (e: ValidationException) {
+            "error" to setOf()
+        }
+    }
+
+    private fun calculateRPN(rpn: List<String>): Set<StudentModel> {
         val stack = Stack<Set<StudentModel>>()
         val students = studentRepository!!.findAll().toSet()
         for (token in rpn) {
             if (token.length > 1) {
-                stack.push(getSampleStudentsByFunction(token, students))
+                if (token == "ALL") stack.push(students)
+                else stack.push(getSampleStudentsByFunction(token, students))
             } else when (token) {
-                "&" -> {
-                    val newSample = mergeStudents(stack.pop(), stack.pop())
-                    stack.push(newSample)
-                }
-                "|" -> {
-                    val newSample = intersectionStudents(stack.pop(), stack.pop())
-                    stack.push(newSample)
-                }
+                "&" -> stack.push(stack.pop().intersect(stack.pop()))
+                "|" -> stack.push(stack.pop() + stack.pop())
                 "-" -> {
                     val sample1 = stack.pop()
-                    val sample2 = if (stack.isEmpty()) students else stack.pop()
-                    val newSample = negationStudents(sample1, sample2.toSet())
+                    val sample2 = stack.pop()
+                    val newSample = sample2 - sample1
                     stack.push(newSample)
                 }
             }
@@ -43,7 +75,7 @@ class DSLHandler {
         return stack.pop()
     }
 
-    private fun toRPN(expression: String): Pair<List<String>, Int> {
+    fun toRPN(expression: String): List<String> {
 
         val result = mutableListOf<String>()
         val stack = Stack<String>()
@@ -53,25 +85,32 @@ class DSLHandler {
 
         while (position < expression.length) {
             val (token, newPosition) = getToken(position, expression)
-            if (priority(token) == 0) {
-                result.add(token)
-                position = newPosition - 1
-                functionCounter++
-            } else if (priority(token) == 1) stack.push(token)
-            else if (priority(token) > 1) {
-                if (stack.isEmpty()) stack.push(token)
-                else {
-                    while (!stack.isEmpty() && priority(stack.peek()) >= priority(token)) result.add(stack.pop())
-                    stack.push(token)
+            val priority = priority(token)
+            when {
+                priority == 0 -> {
+                    result.add(token)
+                    functionCounter++
                 }
-            } else if (priority(token) == -1) {
-                while (priority(stack.peek()) != 1) result.add(stack.pop())
-                stack.pop()
+                priority == 1 -> stack.push(token)
+                priority > 1 -> {
+                    if (priority == 2 && (position == 0 || expression[position - 1] == '(')) {
+                        result.add("ALL")
+                    }
+                    if (stack.isEmpty()) stack.push(token)
+                    else {
+                        while (!stack.isEmpty() && priority(stack.peek()) >= priority) result.add(stack.pop())
+                        stack.push(token)
+                    }
+                }
+                priority == -1 -> {
+                    while (priority(stack.peek()) != 1) result.add(stack.pop())
+                    stack.pop()
+                }
             }
-            position++
+            position = newPosition
         }
         while (!stack.isEmpty()) result.add(stack.pop())
-        return result.toList() to functionCounter
+        return result.toList()
     }
 
     fun priority(token: String) = when (token) {
@@ -90,34 +129,95 @@ class DSLHandler {
             '|', '&', '(', ')', '-' -> token = expression[currentPosition].toString()
             else -> while (expression[position] != ']') position++
         }
+        position++
         if (position != currentPosition) {
-            position++
             token = expression.substring(currentPosition, position)
         }
         return token to position
     }
 
-    private fun negationStudents(sample1: Set<StudentModel>, sample2: Set<StudentModel>): Set<StudentModel> {
-        return sample2 - sample1
-    }
-
-    private fun intersectionStudents(sample1: Set<StudentModel>, sample2: Set<StudentModel>): Set<StudentModel> {
-        return sample1.intersect(sample2)
-    }
-
-    private fun mergeStudents(sample1: Set<StudentModel>, sample2: Set<StudentModel>): Set<StudentModel> {
-        return sample1 + sample2
-    }
-
     private fun getSampleStudentsByFunction(function: String, students: Set<StudentModel>): Set<StudentModel> {
-        val partsFunction = function.split("[")
-        val groupAttribute = partsFunction[0]
-        val args = partsFunction[1].replace("]", "")
+        var (groupAttribute, args) = function.split("[")
+        args = args.replace("]", "")
+        if (groupAttribute.contains('_')) {
+            groupAttribute = groupAttribute.replace("_", " ")
+        }
         return students.filter {
             val needsAttribute = it.attributes!!.find { attribute ->
-                attribute.name == args && attribute.group!!.name == groupAttribute
+                attribute.name!!.lowercase() == args && attribute.group!!.name!!.lowercase() == groupAttribute
             }
             needsAttribute != null
         }.toSet()
+    }
+
+    fun validationExpression(expression: String, groupAttributes: Set<GroupAttributesModel>): Boolean {
+        var position = 0
+
+        var openBracket = 0
+        var closeBracket = 0
+
+        var counterFunction = 0
+        var counterOperators = 0
+        while (position < expression.length) {
+            val (token, newPosition) = getToken(position, expression)
+            when {
+                token.length == 1 -> {
+                    if (token.matches(Regex("""[&|-]"""))) {
+                        val isError = checkIncorrectOperatorPosition(expression, token, position)
+                        if (isError) throw ValidationException("incorrect operator position: $expression")
+                        counterOperators++
+                    }
+                    if (token == "-" && (position == 0 || expression[position - 1] == '(')) counterFunction++
+                    if (token == "(") openBracket++
+                    else if (token == ")") closeBracket++
+                }
+                token.length > 1 && token.matches("""[a-zA-Zа-яА-Я_0-9]+\[[a-zA-Zа-яА-Я0-9_/\\]+]""".toRegex()) -> {
+                    if (!validationFunction(token, groupAttributes)) {
+                        throw ValidationException("incorrect token: $token")
+                    } else counterFunction++
+                }
+                else -> throw ValidationException("incorrect token: $token")
+            }
+            position = newPosition
+        }
+        if (openBracket != closeBracket) {
+            throw ValidationException("incorrect brackets in expression: $expression")
+        }
+        if (counterFunction - counterOperators != 1) throw ValidationException("extra operator: $expression")
+        return true
+    }
+
+    private fun validationFunction(token: String, groupAttributes: Set<GroupAttributesModel>): Boolean {
+        val partsFunction = token.split("[")
+        var groupAttribute = partsFunction[0]
+        if (groupAttribute.contains('_')) {
+            groupAttribute = groupAttribute.replace("_", " ")
+        }
+        val args = partsFunction[1].replace("]", "")
+        val findGroupAttribute = groupAttributes.find { it.name!!.lowercase() == groupAttribute.lowercase() }
+        if (findGroupAttribute != null) {
+            if (findGroupAttribute.attributes!!.find { it.name!!.lowercase() == args.lowercase() } != null) {
+                return true
+            }
+        } else return false
+        return false
+    }
+
+    private fun checkIncorrectOperatorPosition(expression: String, token: String, position: Int): Boolean {
+        return if (token.matches(Regex("""[&|]"""))) {
+            when {
+                position == 0 -> true
+                expression[position - 1].toString().matches(Regex("""[(&|-]""")) -> true
+                position == expression.length - 1 -> true
+                expression[position + 1].toString().matches(Regex("""[)&|-]""")) -> true
+                else -> false
+            }
+        } else {
+            when {
+                position == expression.length - 1 -> true
+                expression[position + 1] == ')' -> true
+                else -> false
+            }
+        }
     }
 }

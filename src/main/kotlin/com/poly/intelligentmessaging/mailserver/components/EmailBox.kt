@@ -86,6 +86,7 @@ class EmailBox {
         inbox.open(Folder.READ_WRITE)
         for (messageIndex in 1..inbox.messageCount) {
             val message = inbox.getMessage(messageIndex) as MimeMessage
+
             val messageFields = getMessageFields(message, senderAddress, recipients)
             listMessage.add(messageFields)
             message.setFlag(Flags.Flag.DELETED, true)

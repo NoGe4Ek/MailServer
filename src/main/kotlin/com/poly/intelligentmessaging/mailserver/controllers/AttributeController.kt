@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/attributes")
 class AttributeController {
 
-//    private val currentStaff = "9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b"
-private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
+    //    private val currentStaff = "9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b"
+    private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
 
     @Autowired
     val groupAttributesService: GroupAttributesService? = null
@@ -30,7 +30,6 @@ private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
 
     @GetMapping("/getAttributes")
     fun getAttributes(): ResponseEntity<List<AttributesDTO>> {
-
         return ResponseEntity(attributesService!!.getAttributes(currentStaff), HttpStatus.OK)
     }
 
@@ -59,7 +58,7 @@ private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
 
     @PostMapping("/createAttribute", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun createAttribute(@RequestBody newAttributeDTO: NewAttributeDTO): ResponseEntity<NewAttributeDTO> {
-        return ResponseEntity(attributesService!!.createAttribute(newAttributeDTO), HttpStatus.CREATED)
+        return ResponseEntity(attributesService!!.createAttribute(newAttributeDTO, currentStaff), HttpStatus.CREATED)
     }
 
     @PostMapping("/updateAttribute", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -82,8 +81,8 @@ private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
         return ResponseEntity(attributesService!!.shareAttribute(shareDTO), HttpStatus.OK)
     }
 
-    @PostMapping("/expression", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun expression(@RequestBody expressionDTO: ExpressionDTO): MutableSet<String> {
-        return attributesService!!.createAttributeFromExpression(expressionDTO)
+    @PostMapping("/calculate", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun calculate(@RequestBody expressionDTO: ExpressionDTO): ResponseEntity<ComputedExpressionDTO> {
+        return ResponseEntity(attributesService!!.calculateExpression(expressionDTO, currentStaff), HttpStatus.OK)
     }
 }

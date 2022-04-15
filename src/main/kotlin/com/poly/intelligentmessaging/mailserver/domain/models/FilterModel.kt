@@ -40,7 +40,7 @@ data class FilterModel(
     var autoForward: Boolean? = null,
 
     @Column(name = "expression")
-    val expression: String? = null,
+    var expression: String? = null,
 
     @CreationTimestamp
     @Column(name = "created")
