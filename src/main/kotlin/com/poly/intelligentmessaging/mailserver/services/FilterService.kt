@@ -15,6 +15,8 @@ import com.poly.intelligentmessaging.mailserver.repositories.StudentRepository
 import com.poly.intelligentmessaging.mailserver.util.EmailAuthenticator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.random.Random
 
@@ -51,12 +53,26 @@ class FilterService {
             } else {
                 val filterName = filter.getFilterName()
                 val mail = filter.getEmail()
-                val type = if (filter.getExpression() == null) "list" else "expression"
-                val mode = filter.getMode()
                 val expression = filter.getExpression()
+                val type = if (expression == null) "list" else "expression"
+                val status = if (type == "expression") {
+                    val createdLocalDateTime = Timestamp.valueOf(filter.getCreated()).toLocalDateTime()
+                    dslHandler!!.getStatus(createdLocalDateTime, expression!!, idStaff)
+                } else "success"
+                val mode = filter.getMode()
                 val created = filter.getCreated().split(" ")[0]
                 val mailCounter = if (mode == "manual" && !isShort) getNumberOfMails(filterId) else null
-                val filtersDTO = FiltersDTO(filterId, filterName, mail, expression, type, mode, created, mailCounter)
+                val filtersDTO = FiltersDTO(
+                    filterId,
+                    filterName,
+                    mail,
+                    expression,
+                    type,
+                    mode,
+                    created,
+                    mailCounter,
+                    status = status
+                )
                 filtersDTO.students.add(filter.getIdStudent())
                 listFiltersDTO[filterId] = filtersDTO
             }
@@ -74,7 +90,13 @@ class FilterService {
             mode = filter.mode!!,
             expression = filter.expression,
             created = "",
-            students = filter.students!!.associateBy { it.id.toString() }.keys.toMutableList()
+            studentsDTO = filter.students!!.associateBy {
+                StudentsDTO(
+                    it.id.toString(),
+                    "${it.person!!.lastName} ${it.person.firstName} ${it.person.patronymic}",
+                    it.person.email!!
+                )
+            }.keys.toMutableSet()
         )
     }
 
@@ -124,6 +146,7 @@ class FilterService {
         filter.expression = if (newFilterDTO.expression == "") null else newFilterDTO.expression
         filter.autoForward = newFilterDTO.mailOption == "auto"
         filter.students = students
+        filter.created = LocalDateTime.now()
         filterRepository.save(filter)
         return newFilterDTO
     }

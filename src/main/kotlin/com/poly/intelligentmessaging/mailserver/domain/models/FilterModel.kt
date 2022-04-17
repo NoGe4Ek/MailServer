@@ -44,7 +44,7 @@ data class FilterModel(
 
     @CreationTimestamp
     @Column(name = "created")
-    val created: LocalDateTime? = null,
+    var created: LocalDateTime? = null,
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = [CascadeType.DETACH])
     @JoinTable(

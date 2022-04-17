@@ -7,5 +7,7 @@ data class AttributesDTO(
     val expression: String? = null,
     val type: String,
     val created: String,
-    val students: MutableList<String> = mutableListOf()
+    val students: MutableList<String> = mutableListOf(),
+    val studentsDTO: MutableSet<StudentsDTO> = mutableSetOf(),
+    val status: String? = null
 )

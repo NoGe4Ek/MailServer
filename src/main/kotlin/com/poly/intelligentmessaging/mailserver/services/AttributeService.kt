@@ -12,6 +12,8 @@ import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StudentRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -36,7 +38,7 @@ class AttributeService {
 
     fun getAttributes(idStaff: String): List<AttributesDTO> {
         val attributes = attributeRepository!!.getAttributes(idStaff)
-        return attributesConvertToDTO(attributes)
+        return attributesConvertToDTO(attributes, idStaff)
     }
 
     fun getAttributeById(attributeIdDTO: AttributeIdDTO): AttributesDTO {
@@ -48,16 +50,25 @@ class AttributeService {
             type = if (attribute.expression == null) "list" else "expression",
             expression = attribute.expression,
             created = "",
-            students = attribute.students!!.associateBy { it.id.toString() }.keys.toMutableList()
+            studentsDTO = attribute.students!!.associateBy {
+                StudentsDTO(
+                    it.id.toString(),
+                    "${it.person!!.lastName} ${it.person.firstName} ${it.person.patronymic}",
+                    it.person.email!!
+                )
+            }.keys.toMutableSet()
         )
     }
 
     fun getAttributesCurrentStaff(idStaff: String): List<AttributesDTO> {
         val attributes = attributeRepository!!.getAttributesCurrentStaff(idStaff)
-        return attributesConvertToDTO(attributes)
+        return attributesConvertToDTO(attributes, idStaff)
     }
 
-    private fun attributesConvertToDTO(attributes: MutableList<AttributeProjection>): List<AttributesDTO> {
+    private fun attributesConvertToDTO(
+        attributes: MutableList<AttributeProjection>,
+        idStaff: String
+    ): List<AttributesDTO> {
         val listAttributesDTO = mutableMapOf<String, AttributesDTO>()
         for (attribute in attributes) {
             val id = attribute.getId()
@@ -68,8 +79,13 @@ class AttributeService {
                 val groupName = attribute.getGroupName()
                 val expression = attribute.getExpression()
                 val type = if (attribute.getExpression() == null) "list" else "expression"
+                val status = if (type == "expression") {
+                    val createdLocalDateTime = Timestamp.valueOf(attribute.getCreated()).toLocalDateTime()
+                    dslHandler!!.getStatus(createdLocalDateTime, expression!!, idStaff)
+                } else "success"
                 val created = attribute.getCreated().split(" ")[0]
-                val attributesDTO = AttributesDTO(id, attributeName, groupName, expression, type, created)
+                val attributesDTO =
+                    AttributesDTO(id, attributeName, groupName, expression, type, created, status = status)
                 attributesDTO.students.add(attribute.getStudentId())
                 listAttributesDTO[id] = attributesDTO
             }
@@ -109,6 +125,7 @@ class AttributeService {
         attributeModel.name = newAttributeDTO.name
         attributeModel.expression = if (newAttributeDTO.expression == "") null else newAttributeDTO.expression
         attributeModel.students = setStudents
+        attributeModel.created = LocalDateTime.now()
         attributeRepository.save(attributeModel)
         return newAttributeDTO
     }
