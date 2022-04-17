@@ -39,6 +39,19 @@ class AttributeService {
         return attributesConvertToDTO(attributes)
     }
 
+    fun getAttributeById(attributeIdDTO: AttributeIdDTO): AttributesDTO {
+        val attribute = attributeRepository!!.findById(UUID.fromString(attributeIdDTO.idAttribute)).get()
+        return AttributesDTO(
+            id = attribute.id.toString(),
+            attributeName = attribute.name!!,
+            groupName = attribute.group!!.name!!,
+            type = if (attribute.expression == null) "list" else "expression",
+            expression = attribute.expression,
+            created = "",
+            students = attribute.students!!.associateBy { it.id.toString() }.keys.toMutableList()
+        )
+    }
+
     fun getAttributesCurrentStaff(idStaff: String): List<AttributesDTO> {
         val attributes = attributeRepository!!.getAttributesCurrentStaff(idStaff)
         return attributesConvertToDTO(attributes)
@@ -53,9 +66,10 @@ class AttributeService {
             } else {
                 val attributeName = attribute.getAttributeName()
                 val groupName = attribute.getGroupName()
+                val expression = attribute.getExpression()
                 val type = if (attribute.getExpression() == null) "list" else "expression"
                 val created = attribute.getCreated().split(" ")[0]
-                val attributesDTO = AttributesDTO(id, attributeName, groupName, type, created)
+                val attributesDTO = AttributesDTO(id, attributeName, groupName, expression, type, created)
                 attributesDTO.students.add(attribute.getStudentId())
                 listAttributesDTO[id] = attributesDTO
             }
@@ -68,7 +82,8 @@ class AttributeService {
         newAttributeDTO.studentsId!!.forEach {
             students.add(studentRepository!!.findById(UUID.fromString(it)).get())
         }
-        val groupAttributeModel = groupAttributesRepository!!.findByName(newAttributeDTO.groupName!!)
+        val groupAttributeModel =
+            groupAttributesRepository!!.findByNameAndStaffId(newAttributeDTO.groupName!!, UUID.fromString(idStaff))
         val staff = staffRepository!!.findById(UUID.fromString(idStaff)).get()
         val attributeModel = AttributeModel(
             staff = staff,
@@ -82,12 +97,13 @@ class AttributeService {
         return newAttributeDTO
     }
 
-    fun updateAttribute(newAttributeDTO: NewAttributeDTO): NewAttributeDTO {
+    fun updateAttribute(newAttributeDTO: NewAttributeDTO, idStaff: String): NewAttributeDTO {
         val setStudents = mutableSetOf<StudentModel>()
         newAttributeDTO.studentsId!!.forEach {
             setStudents.add(studentRepository!!.findById(UUID.fromString(it)).get())
         }
-        val groupAttributeModel = groupAttributesRepository!!.findByName(newAttributeDTO.groupName!!)
+        val groupAttributeModel =
+            groupAttributesRepository!!.findByNameAndStaffId(newAttributeDTO.groupName!!, UUID.fromString(idStaff))
         val attributeModel = attributeRepository!!.findById(UUID.fromString(newAttributeDTO.idAttribute)).get()
         attributeModel.group = groupAttributeModel
         attributeModel.name = newAttributeDTO.name

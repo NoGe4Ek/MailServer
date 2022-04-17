@@ -20,18 +20,22 @@ class GroupAttributesService {
     @Autowired
     val staffRepository: StaffRepository? = null
 
-    fun getGroupAttributes(idStaff: String): MutableList<GroupAttributeDTO> {
-        val listResult = mutableListOf<GroupAttributeDTO>()
-        val listGroups = groupAttributesRepository!!.getGroupAttributes(idStaff)
-        listGroups.forEach { group ->
-            val temp = GroupAttributeDTO(
-                group.getId(),
-                group.getGroupName(),
-                group.getAttributes().split("|").filter { it != "" }
+    fun getGroupAttributes(idStaff: String, basicStaff: String): MutableSet<GroupAttributeDTO> {
+        val result = mutableSetOf<GroupAttributeDTO>()
+        val setGroups = groupAttributesRepository!!.findAllByStaffIdOrStaffId(
+            UUID.fromString(idStaff),
+            UUID.fromString(basicStaff)
+        )
+        for (group in setGroups) {
+            if (group.attributes!!.isEmpty()) continue
+            val dto = GroupAttributeDTO(
+                group.id.toString(),
+                group.name!!,
+                group.attributes.associateBy { attribute -> attribute.name!! }.keys
             )
-            listResult.add(temp)
+            result.add(dto)
         }
-        return listResult
+        return result
     }
 
     fun getGroupNames(idStaff: String): MutableList<GroupNameProjection> {

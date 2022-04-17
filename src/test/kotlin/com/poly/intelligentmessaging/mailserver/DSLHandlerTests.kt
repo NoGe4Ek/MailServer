@@ -30,9 +30,12 @@ class DSLHandlerTests {
     private val basicIdStaff = "ad7a8951-2f95-4619-802b-1285c3279623"
 
     private fun getGroupAttributes(): Set<GroupAttributesModel> {
-        val currentStaff = staffRepository!!.findById(UUID.fromString(currentIdStaff)).get()
-        val basicStaff = staffRepository.findById(UUID.fromString(basicIdStaff)).get()
-        return groupAttributesRepository!!.findAllByStaffOrStaff(currentStaff, basicStaff)
+//        val currentStaff = staffRepository!!.findById(UUID.fromString(currentIdStaff)).get()
+//        val basicStaff = staffRepository.findById(UUID.fromString(basicIdStaff)).get()
+        return groupAttributesRepository!!.findAllByStaffIdOrStaffId(
+            UUID.fromString(currentIdStaff),
+            UUID.fromString(basicIdStaff)
+        )
     }
 
     private val listCorrectExpressions = listOf(
@@ -48,6 +51,7 @@ class DSLHandlerTests {
         "(номер_группы[3530901/80203] & номер_группы[3530901/80202]) & финансирование[бюджет]",
     )
     private val listIncorrectExpressions = listOf(
+        "номер_группы",
         "(номер_группы[3530901/80203]",
         "номер_группы[3530901/80203])",
         "номергруппы[3530901/80203]",
@@ -70,11 +74,13 @@ class DSLHandlerTests {
         val groupAttributes = getGroupAttributes()
 
         for (expression in listCorrectExpressions) {
-            assertTrue(dslHandler.validationExpression(expression, groupAttributes))
+            val expressionWithoutSpace = expression.replace(Regex("""\s+"""), "")
+            assertTrue(dslHandler.validationExpression(expressionWithoutSpace, groupAttributes))
         }
         for (expression in listIncorrectExpressions) {
+            val expressionWithoutSpace = expression.replace(Regex("""\s+"""), "")
             assertThrows(ValidationException::class.java) {
-                dslHandler.validationExpression(expression, groupAttributes)
+                dslHandler.validationExpression(expressionWithoutSpace, groupAttributes)
             }
         }
     }

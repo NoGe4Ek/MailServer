@@ -53,14 +53,29 @@ class FilterService {
                 val mail = filter.getEmail()
                 val type = if (filter.getExpression() == null) "list" else "expression"
                 val mode = filter.getMode()
+                val expression = filter.getExpression()
                 val created = filter.getCreated().split(" ")[0]
                 val mailCounter = if (mode == "manual" && !isShort) getNumberOfMails(filterId) else null
-                val filtersDTO = FiltersDTO(filterId, filterName, mail, type, mode, created, mailCounter)
+                val filtersDTO = FiltersDTO(filterId, filterName, mail, expression, type, mode, created, mailCounter)
                 filtersDTO.students.add(filter.getIdStudent())
                 listFiltersDTO[filterId] = filtersDTO
             }
         }
         return listFiltersDTO.values.toList()
+    }
+
+    fun getFilterById(filterIdDTO: FilterIdDTO): FiltersDTO {
+        val filter = filterRepository!!.findById(UUID.fromString(filterIdDTO.idFilter)).get()
+        return FiltersDTO(
+            id = filter.id.toString(),
+            filterName = filter.name!!,
+            mail = filter.emailSend!!.email!!,
+            type = if (filter.expression == null) "list" else "expression",
+            mode = filter.mode!!,
+            expression = filter.expression,
+            created = "",
+            students = filter.students!!.associateBy { it.id.toString() }.keys.toMutableList()
+        )
     }
 
     fun createFilter(newFilterDTO: NewFilterDTO, idStaff: String): NewFilterDTO {

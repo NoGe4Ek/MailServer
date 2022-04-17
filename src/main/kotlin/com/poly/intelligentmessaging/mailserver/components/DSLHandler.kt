@@ -25,9 +25,10 @@ class DSLHandler {
     private val groupAttributesRepository: GroupAttributesRepository? = null
 
     fun getComputedExpression(expression: String, currentIdStaff: String, basicIdStaff: String): ComputedExpressionDTO {
-        val currentStaff = staffRepository!!.findById(UUID.fromString(currentIdStaff)).get()
-        val basicStaff = staffRepository.findById(UUID.fromString(basicIdStaff)).get()
-        val groupAttributes = groupAttributesRepository!!.findAllByStaffOrStaff(currentStaff, basicStaff)
+        val groupAttributes = groupAttributesRepository!!.findAllByStaffIdOrStaffId(
+            UUID.fromString(currentIdStaff),
+            UUID.fromString(basicIdStaff)
+        )
         val (status, students) = calculateExpression(expression, groupAttributes)
         val studentsDTO = mutableSetOf<StudentsDTO>()
         for (student in students) {
@@ -127,7 +128,12 @@ class DSLHandler {
         var token = ""
         when (expression[position]) {
             '|', '&', '(', ')', '-' -> token = expression[currentPosition].toString()
-            else -> while (expression[position] != ']') position++
+            else -> while (expression[position] != ']') {
+                if (position == expression.length - 1 && expression[position] != ']') {
+                    throw ValidationException("incorrect expression: $expression")
+                }
+                position++
+            }
         }
         position++
         if (position != currentPosition) {
@@ -141,6 +147,9 @@ class DSLHandler {
         args = args.replace("]", "")
         if (groupAttribute.contains('_')) {
             groupAttribute = groupAttribute.replace("_", " ")
+        }
+        if (args.contains('_')) {
+            args = args.replace("_", " ")
         }
         return students.filter {
             val needsAttribute = it.attributes!!.find { attribute ->
@@ -176,7 +185,7 @@ class DSLHandler {
                         throw ValidationException("incorrect token: $token")
                     } else counterFunction++
                 }
-                else -> throw ValidationException("incorrect token: $token")
+                else -> throw ValidationException("incorrect token: $token  ->  { $expression }")
             }
             position = newPosition
         }
@@ -193,7 +202,10 @@ class DSLHandler {
         if (groupAttribute.contains('_')) {
             groupAttribute = groupAttribute.replace("_", " ")
         }
-        val args = partsFunction[1].replace("]", "")
+        var args = partsFunction[1].replace("]", "")
+        if (args.contains('_')) {
+            args = args.replace("_", " ")
+        }
         val findGroupAttribute = groupAttributes.find { it.name!!.lowercase() == groupAttribute.lowercase() }
         if (findGroupAttribute != null) {
             if (findGroupAttribute.attributes!!.find { it.name!!.lowercase() == args.lowercase() } != null) {

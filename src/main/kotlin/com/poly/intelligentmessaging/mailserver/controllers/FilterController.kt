@@ -57,4 +57,9 @@ class FilterController {
     fun calculate(@RequestBody expressionDTO: ExpressionDTO): ResponseEntity<ComputedExpressionDTO> {
         return ResponseEntity(filterService!!.calculateExpression(expressionDTO, currentStaff), HttpStatus.OK)
     }
+
+    @PostMapping("/getFilterById", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getAttributeById(@RequestBody filterIdDTO: FilterIdDTO): ResponseEntity<FiltersDTO> {
+        return ResponseEntity(filterService!!.getFilterById(filterIdDTO), HttpStatus.OK)
+    }
 }
