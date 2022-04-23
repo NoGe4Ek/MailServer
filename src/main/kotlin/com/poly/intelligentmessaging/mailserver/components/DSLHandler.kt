@@ -57,6 +57,20 @@ class DSLHandler {
         return status
     }
 
+    fun getAttributesFromExpression(expression: String): MutableMap<String, MutableSet<String>> {
+        val groupToAttributes = mutableMapOf<String, MutableSet<String>>()
+        var position = 0
+        while (position < expression.length) {
+            val (token, newPosition) = getToken(position, expression)
+            if (token.length == 1) continue
+            val (group, args) = getGroupAndAttr(token)
+            if (groupToAttributes.containsKey(group)) groupToAttributes[group]!!.add(args)
+            else groupToAttributes[group] = mutableSetOf(args)
+            position = newPosition
+        }
+        return groupToAttributes
+    }
+
     private fun getAttributesFromExpression(
         expr: String,
         attributes: List<AttributeProjection>
@@ -121,7 +135,6 @@ class DSLHandler {
     }
 
     fun toRPN(expression: String): List<String> {
-
         val result = mutableListOf<String>()
         val stack = Stack<String>()
         var functionCounter = 0
@@ -223,34 +236,19 @@ class DSLHandler {
         return token to position
     }
 
-    private fun getSampleStudentsByFunction(function: String, students: Set<StudentModel>): Set<StudentModel> {
-        var (groupAttribute, args) = function.split("[")
-        args = args.replace("]", "")
-        if (groupAttribute.contains('_')) {
-            groupAttribute = groupAttribute.replace("_", " ")
-        }
-        if (args.contains('_')) {
-            args = args.replace("_", " ")
-        }
+    private fun getSampleStudentsByFunction(token: String, students: Set<StudentModel>): Set<StudentModel> {
+        val (group, args) = getGroupAndAttr(token)
         return students.filter {
             val needsAttribute = it.attributes!!.find { attribute ->
-                attribute.name!!.lowercase() == args && attribute.group!!.name!!.lowercase() == groupAttribute
+                attribute.name!!.lowercase() == args && attribute.group!!.name!!.lowercase() == group
             }
             needsAttribute != null
         }.toSet()
     }
 
     private fun validationFunction(token: String, groupAttributes: Set<GroupAttributesModel>): Boolean {
-        val partsFunction = token.split("[")
-        var groupAttribute = partsFunction[0]
-        if (groupAttribute.contains('_')) {
-            groupAttribute = groupAttribute.replace("_", " ")
-        }
-        var args = partsFunction[1].replace("]", "")
-        if (args.contains('_')) {
-            args = args.replace("_", " ")
-        }
-        val findGroupAttribute = groupAttributes.find { it.name!!.lowercase() == groupAttribute.lowercase() }
+        val (group, args) = getGroupAndAttr(token)
+        val findGroupAttribute = groupAttributes.find { it.name!!.lowercase() == group.lowercase() }
         if (findGroupAttribute != null) {
             if (findGroupAttribute.attributes!!.find { it.name!!.lowercase() == args.lowercase() } != null) {
                 return true
@@ -275,5 +273,17 @@ class DSLHandler {
                 else -> false
             }
         }
+    }
+
+    private fun getGroupAndAttr(token: String): Pair<String, String> {
+        var (group, args) = token.split("[")
+        args = args.replace("]", "")
+        if (group.contains('_')) {
+            group = group.replace("_", " ")
+        }
+        if (args.contains('_')) {
+            args = args.replace("_", " ")
+        }
+        return group to args
     }
 }

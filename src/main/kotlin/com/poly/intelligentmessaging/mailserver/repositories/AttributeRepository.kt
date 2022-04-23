@@ -51,4 +51,10 @@ interface AttributeRepository : JpaRepository<AttributeModel, UUID> {
         nativeQuery = true
     )
     fun getAttributesCurrentStaff(idStaff: String): MutableList<AttributeProjection>
+
+//    fun findByIdStaffAndNameAndGroupAttribute(
+//        idStaff: UUID,
+//        name: String,
+//        groupAttribute: GroupAttributesModel
+//    ): AttributeModel
 }

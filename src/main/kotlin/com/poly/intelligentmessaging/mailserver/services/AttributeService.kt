@@ -137,6 +137,12 @@ class AttributeService {
 
     fun shareAttribute(shareDTO: ShareDTO): ShareDTO {
         val attribute = attributeRepository!!.findById(UUID.fromString(shareDTO.id)).get()
+        var expression: String? = null
+        if (attribute.expression != null) {
+            val groupExpr = attribute.group!!.name!!.lowercase().replace("\\s+".toRegex(), "_")
+            val attrExpr = attribute.name!!.lowercase().replace("\\s+".toRegex(), "_")
+            expression = "$groupExpr[$attrExpr]"
+        }
         for (staffId in shareDTO.staffIds!!) {
             val staff = staffRepository!!.findById(UUID.fromString(staffId)).get()
             val groupReference = attribute.group!!
@@ -149,13 +155,29 @@ class AttributeService {
                     GroupAttributesModel(staff = staff, name = groupReference.name)
                 ),
                 name = attribute.name,
-                expression = attribute.expression,
+                expression = expression,
                 students = students
             )
             attributeRepository.save(attributeModel)
         }
         return shareDTO
     }
+
+//    fun getAttributesFromExpression(attribute: AttributeModel, ownerAttributes: String): Set<AttributeModel> {
+//        val expression = attribute.expression!!
+//        val groupAndAttributes = dslHandler!!.getAttributesFromExpression(expression)
+//        val attributes = mutableSetOf<AttributeModel>()
+//        groupAndAttributes.forEach {
+//            val groupModel = groupAttributesRepository!!
+//                .findByNameAndStaffId(it.key, UUID.fromString(ownerAttributes))
+//            it.value.forEach { attr ->
+//                val attributeModel = attributeRepository!!
+//                    .findByIdStaffAndNameAndGroupAttribute(UUID.fromString(ownerAttributes), attr, groupModel)
+//                attributes.add(attributeModel)
+//            }
+//        }
+//        return attributes
+//    }
 
     fun calculateExpression(expressionDTO: ExpressionDTO, currentIdStaff: String): ComputedExpressionDTO {
         return dslHandler!!.getComputedExpression(expressionDTO.expression!!, currentIdStaff, basicIdStaff)

@@ -11,16 +11,10 @@ https://russianblogs.com/article/3738211940/
 
 https://losst.ru/ustanovka-postfix-ubuntu-s-dovecot
 
-deploy scp -P 4080 ./target/MailServer-0.0.4.jar root@ntarasenko.simsim.ftp.sh:/root/mail_server/backend-mail
+deploy scp -P 4080 ./target/MailServer-1.0.0.jar root@poly-sender.ru:/root/server
 
 users /etc/dovecot/users
 
 https://www.8host.com/blog/nastrojka-pochtovogo-servera-postfixdovecot/
 
-5. добавить подсветку текущей вкладки -
-7. добавить лейблы текущих страниц -
-10. контролировать изменение фильтров и атрибутов через дату
-11. шарить атрибуты и фильтры сделанные с помощью выражений
-12. удалить кнопку в фильтрах
-
-
+2. шарить атрибуты и фильтры сделанные с помощью выражений
