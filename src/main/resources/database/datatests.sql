@@ -17,13 +17,13 @@ INSERT INTO person
 VALUES ('3a00ac40-791c-48ad-abf1-b0be560043a2', 'Student3', 'Student3', 'Student3', 'tarasenko.es@edu.spbstu.ru');
 
 INSERT INTO staff
-VALUES ('ad7a8951-2f95-4619-802b-1285c3279623', '887f38df-9e1f-407f-b82d-c28ceddc92ed');
+VALUES ('ad7a8951-2f95-4619-802b-1285c3279623', '887f38df-9e1f-407f-b82d-c28ceddc92ed', 'all');
 
 INSERT INTO staff
-VALUES ('9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b', 'fde5395e-766f-492e-b6c6-cca981026769');
+VALUES ('9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b', 'fde5395e-766f-492e-b6c6-cca981026769', 'staff1');
 
 INSERT INTO staff
-VALUES ('725cee0f-7a95-4094-b19a-11b27f779490', 'f53a37c1-4db0-4c50-a490-6ef18f74c20f');
+VALUES ('725cee0f-7a95-4094-b19a-11b27f779490', 'f53a37c1-4db0-4c50-a490-6ef18f74c20f', 'staff2');
 
 INSERT INTO group_attributes
 VALUES ('a6d2f576-1c52-48f1-b092-5fe5dbfe860f', 'ad7a8951-2f95-4619-802b-1285c3279623', 'Страна');

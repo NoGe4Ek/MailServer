@@ -49,7 +49,7 @@ class AttributeService {
             groupName = attribute.group!!.name!!,
             type = if (attribute.expression == null) "list" else "expression",
             expression = attribute.expression,
-            created = "",
+            created = attribute.created.toString(),
             studentsDTO = attribute.students!!.associateBy {
                 StudentsDTO(
                     it.id.toString(),

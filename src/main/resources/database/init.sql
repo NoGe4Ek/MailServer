@@ -12,6 +12,7 @@ CREATE TABLE staff
 (
     id        UUID PRIMARY KEY,
     id_person UUID        NOT NULL,
+    password  TEXT        NOT NULL,
     created   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (id_person) REFERENCES person (id)
 );

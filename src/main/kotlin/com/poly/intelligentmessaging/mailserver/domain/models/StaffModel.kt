@@ -19,6 +19,9 @@ data class StaffModel(
     @JoinColumn(name = "id_person", nullable = false)
     val person: PersonModel? = null,
 
+    @JoinColumn(name = "password", nullable = false)
+    val password: String? = null,
+
     @CreationTimestamp
     @Column(name = "created")
     val created: LocalDateTime? = null,
