@@ -18,3 +18,5 @@ users /etc/dovecot/users
 https://www.8host.com/blog/nastrojka-pochtovogo-servera-postfixdovecot/
 
 2. шарить атрибуты и фильтры сделанные с помощью выражений
+
+https://medium.com/@kshep92/single-page-applications-with-spring-boot-b64d8d37015d

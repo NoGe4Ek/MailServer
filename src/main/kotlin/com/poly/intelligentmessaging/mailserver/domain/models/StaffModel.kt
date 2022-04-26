@@ -20,7 +20,7 @@ data class StaffModel(
     val person: PersonModel? = null,
 
     @JoinColumn(name = "password", nullable = false)
-    val password: String? = null,
+    var password: String? = null,
 
     @CreationTimestamp
     @Column(name = "created")
@@ -38,7 +38,7 @@ data class StaffModel(
     @JoinColumn(name = "id_staff")
     val groups: Set<GroupAttributesModel>? = null,
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "role_to_staff",
         joinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")],

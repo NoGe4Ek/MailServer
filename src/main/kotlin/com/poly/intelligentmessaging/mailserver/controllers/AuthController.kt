@@ -1,7 +1,10 @@
 package com.poly.intelligentmessaging.mailserver.controllers
 
-import com.poly.intelligentmessaging.mailserver.domain.dto.AuthDTO
+import com.poly.intelligentmessaging.mailserver.domain.dto.AuthRequestDTO
+import com.poly.intelligentmessaging.mailserver.domain.dto.AuthResponseDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.NewStaffDTO
+import com.poly.intelligentmessaging.mailserver.services.AuthService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -14,14 +17,18 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/login")
 class AuthController {
 
+    @Autowired
+    private val authService: AuthService? = null
+
     @PostMapping("/check", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun check(@RequestBody authDTO: AuthDTO): ResponseEntity<AuthDTO> {
-        return ResponseEntity(authDTO, HttpStatus.ACCEPTED)
+    fun check(@RequestBody authRequestDTO: AuthRequestDTO): ResponseEntity<AuthResponseDTO> {
+        val response = authService!!.check(authRequestDTO)
+        return ResponseEntity(response, HttpStatus.OK)
     }
 
     @PostMapping("/reset", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun reset(@RequestBody authDTO: AuthDTO): ResponseEntity<AuthDTO> {
-        return ResponseEntity(authDTO, HttpStatus.OK)
+    fun reset(@RequestBody authRequestDTO: AuthRequestDTO): ResponseEntity<AuthRequestDTO> {
+        return ResponseEntity(authService!!.reset(authRequestDTO), HttpStatus.OK)
     }
 
     @PostMapping("/getAccess", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -29,3 +36,5 @@ class AuthController {
         return ResponseEntity(newStaffDTO, HttpStatus.OK)
     }
 }
+
+//    b0a32b95-afca-4ac0-bef1-f94be735e66c

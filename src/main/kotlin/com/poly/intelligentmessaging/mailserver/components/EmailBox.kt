@@ -47,6 +47,26 @@ class EmailBox {
         folder.close()
     }
 
+    fun sendNoReply(password: String, recipient: String) {
+        val noReply = "noreply@poly-sender.ru"
+        val sender = mailSenderFactoryImpl!!.getSender(noReply, "xOWx*%Wzom")
+        val mimeMessage = sender.createMimeMessage()
+        val email = MimeMessageHelper(mimeMessage)
+        email.setTo(recipient)
+        email.setText(
+            """
+    ВНИМАНИЕ! Никому не сообщайте ваш пароль!
+    
+    Ваш новый пароль: $password
+    
+    
+    С уважением, PolySender!""".trimIndent()
+        )
+        email.setSubject("Изменение пароля")
+        email.setFrom(noReply)
+        sender.send(mimeMessage)
+    }
+
     private fun getMessageFields(message: MimeMessage, sender: String, recipients: Set<String>): MessageFields {
         val subject = if (message.subject != null) message.subject else ""
         val messageFields = MessageFields(sender, recipients, subject)
