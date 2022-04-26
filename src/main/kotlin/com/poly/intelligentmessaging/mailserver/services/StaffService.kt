@@ -2,6 +2,9 @@ package com.poly.intelligentmessaging.mailserver.services
 
 import com.poly.intelligentmessaging.mailserver.configuration.jwt.JwtTokenProvider
 import com.poly.intelligentmessaging.mailserver.domain.dto.*
+import com.poly.intelligentmessaging.mailserver.domain.models.AccessModel
+import com.poly.intelligentmessaging.mailserver.repositories.AccessRepository
+import com.poly.intelligentmessaging.mailserver.repositories.NotificationRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
 import com.poly.intelligentmessaging.mailserver.util.BASIC_ID_STAFF
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,6 +29,18 @@ class StaffService {
 
     @Autowired
     private val authenticationManager: AuthenticationManager? = null
+
+    @Autowired
+    private val notificationRepository: NotificationRepository? = null
+
+    @Autowired
+    private val accessRepository: AccessRepository? = null
+
+    @Autowired
+    private val attributeService: AttributeService? = null
+
+    @Autowired
+    private val filterService: FilterService? = null
 
     fun getStaff(staffDTO: StaffDTO): MutableList<StaffDTO> {
         val listStaffDTO = mutableListOf<StaffDTO>()
@@ -54,18 +69,51 @@ class StaffService {
     }
 
     fun changeAccess(staffDTO: StaffDTO) {
-        TODO()
+        val staff = staffRepository!!.findById(UUID.fromString(staffDTO.id!!)).get()
+        val person = staff.person!!
+        val accessModel = AccessModel(
+            staff = staff,
+            lastName = person.lastName,
+            firstName = person.firstName,
+            patronymic = person.patronymic,
+            email = person.email,
+            department = "ИКНТ",
+            highSchool = "ВШИСиСТ",
+        )
+        accessRepository!!.save(accessModel)
     }
 
     fun getNotifications(staffDTO: StaffDTO): Set<NotificationDTO> {
-        TODO()
+        val notifications = notificationRepository!!.findByConsumerId(UUID.fromString(staffDTO.id))
+        val result = mutableSetOf<NotificationDTO>()
+        notifications.forEach { notification ->
+            val producer = notification.producer!!
+            val fullName = "${producer.person!!.lastName} ${producer.person.firstName} ${producer.person.patronymic}"
+            val nameItem =
+                if (notification.filter != null) notification.filter.name!! else notification.attribute!!.name!!
+            result.add(
+                NotificationDTO(
+                    idNotification = notification.id.toString(),
+                    idOwner = producer.id.toString(),
+                    fullNameOwner = fullName,
+                    type = if (notification.filter != null) "filter" else "attribute",
+                    name = nameItem,
+                    date = notification.created!!.toLocalDate().toString(),
+                )
+            )
+        }
+        return result
     }
 
-    fun acceptRequest(nrDTO: NotificationResponseDTO): Set<NotificationDTO> {
-        TODO()
+    fun acceptRequest(nrDTO: NotificationResponseDTO): NotificationResponseDTO {
+        val notification = notificationRepository!!.findById(UUID.fromString(nrDTO.idNotification)).get()
+        if (notification.filter != null) filterService!!.acceptNotification(notification, nrDTO.type!!)
+        else attributeService!!.acceptNotification(notification, nrDTO.type!!)
+        return nrDTO
     }
 
-    fun rejectRequest(nrDTO: NotificationResponseDTO): Set<NotificationDTO> {
-        TODO()
+    fun rejectRequest(nrDTO: NotificationResponseDTO): NotificationResponseDTO {
+        notificationRepository!!.deleteById(UUID.fromString(nrDTO.idNotification))
+        return nrDTO
     }
 }

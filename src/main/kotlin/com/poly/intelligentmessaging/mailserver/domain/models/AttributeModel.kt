@@ -20,6 +20,10 @@ data class AttributeModel(
     val staff: StaffModel? = null,
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
+    @JoinColumn(name = "id_producer", nullable = true)
+    val producer: StaffModel? = null,
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
     @JoinColumn(name = "id_group_attribute", nullable = false)
     var group: GroupAttributesModel? = null,
 

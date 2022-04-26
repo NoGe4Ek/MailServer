@@ -1,5 +1,6 @@
 package com.poly.intelligentmessaging.mailserver.domain.models
 
+import org.hibernate.Hibernate
 import org.hibernate.annotations.CreationTimestamp
 import org.springframework.lang.NonNull
 import java.time.LocalDateTime
@@ -45,4 +46,19 @@ data class AccessModel(
     @CreationTimestamp
     @Column(name = "created")
     val created: LocalDateTime? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
+        other as AccessModel
+
+        return id != null && id == other.id
+    }
+
+    override fun hashCode(): Int = javaClass.hashCode()
+
+    @Override
+    override fun toString(): String {
+        return this::class.simpleName + "(id = $id , lastName = $lastName , firstName = $firstName , patronymic = $patronymic , email = $email , department = $department , highSchool = $highSchool , created = $created )"
+    }
+}

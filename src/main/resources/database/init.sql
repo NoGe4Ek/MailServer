@@ -141,11 +141,11 @@ CREATE TABLE notification
     id           UUID PRIMARY KEY,
     id_consumer  UUID        NOT NULL,
     id_producer  UUID        NOT NULL,
-    id_filer     UUID,
+    id_filter    UUID,
     id_attribute UUID,
     created      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (id_consumer) REFERENCES staff (id),
     FOREIGN KEY (id_producer) REFERENCES staff (id),
-    FOREIGN KEY (id_filer) REFERENCES filter (id),
+    FOREIGN KEY (id_filter) REFERENCES filter (id),
     FOREIGN KEY (id_attribute) REFERENCES attribute (id)
 );

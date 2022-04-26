@@ -40,12 +40,12 @@ class StaffController {
     }
 
     @PostMapping("/acceptRequest", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun acceptRequest(@RequestBody nrDTO: NotificationResponseDTO): ResponseEntity<Set<NotificationDTO>> {
+    fun acceptRequest(@RequestBody nrDTO: NotificationResponseDTO): ResponseEntity<NotificationResponseDTO> {
         return ResponseEntity(staffService!!.acceptRequest(nrDTO), HttpStatus.OK)
     }
 
     @PostMapping("/rejectRequest", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun rejectRequest(@RequestBody nrDTO: NotificationResponseDTO): ResponseEntity<Set<NotificationDTO>> {
+    fun rejectRequest(@RequestBody nrDTO: NotificationResponseDTO): ResponseEntity<NotificationResponseDTO> {
         return ResponseEntity(staffService!!.rejectRequest(nrDTO), HttpStatus.OK)
     }
 }

@@ -4,10 +4,7 @@ import com.poly.intelligentmessaging.mailserver.components.DSLHandler
 import com.poly.intelligentmessaging.mailserver.components.EmailBox
 import com.poly.intelligentmessaging.mailserver.domain.EmailData
 import com.poly.intelligentmessaging.mailserver.domain.dto.*
-import com.poly.intelligentmessaging.mailserver.domain.models.EmailModel
-import com.poly.intelligentmessaging.mailserver.domain.models.FilterModel
-import com.poly.intelligentmessaging.mailserver.domain.models.StaffModel
-import com.poly.intelligentmessaging.mailserver.domain.models.StudentModel
+import com.poly.intelligentmessaging.mailserver.domain.models.*
 import com.poly.intelligentmessaging.mailserver.repositories.EmailRepository
 import com.poly.intelligentmessaging.mailserver.repositories.FilterRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
@@ -41,6 +38,9 @@ class FilterService {
 
     @Autowired
     private val dslHandler: DSLHandler? = null
+
+    @Autowired
+    private val notificationService: NotificationService? = null
 
     fun getFilters(idStaff: String, isShort: Boolean): List<FiltersDTO> {
         val listFiltersDTO = mutableMapOf<String, FiltersDTO>()
@@ -172,37 +172,20 @@ class FilterService {
     }
 
     fun shareFilter(shareDTO: ShareDTO): ShareDTO {
-        val filter = filterRepository!!.findById(UUID.fromString(shareDTO.id)).get()
-        for (staffId in shareDTO.staffIds!!) {
-            val staff = staffRepository!!.findById(UUID.fromString(staffId)).get()
-            val (send, answer) = generateMailData(staff, filter.name!!)
-            val students = mutableSetOf<StudentModel>()
-            filter.students!!.forEach { students.add(it) }
-            val filterModel = FilterModel(
-                staff = staff,
-                emailSend = emailRepository!!.save(
-                    EmailModel(
-                        email = send.email,
-                        password = send.password,
-                        mailDirectory = send.mailDirectory
-                    )
-                ),
-                emailAnswer = emailRepository.save(
-                    EmailModel(
-                        email = answer.email,
-                        password = answer.password,
-                        mailDirectory = answer.mailDirectory
-                    )
-                ),
-                name = filter.name,
-                mode = filter.mode,
-                autoForward = filter.autoForward,
-                expression = filter.expression,
-                students = students
-            )
-            filterRepository.save(filterModel)
-        }
-        return shareDTO
+        return notificationService!!.createNotifications(shareDTO, true)
+    }
+
+    fun acceptNotification(notification: NotificationModel, type: String) {
+        if (type == "link") linkFilter(notification)
+        if (type == "copy") copyFilter(notification)
+    }
+
+    private fun linkFilter(notification: NotificationModel) {
+        TODO()
+    }
+
+    private fun copyFilter(notification: NotificationModel) {
+        TODO()
     }
 
     fun calculateExpression(expressionDTO: ExpressionDTO): ComputedExpressionDTO {

@@ -4,6 +4,7 @@ import com.poly.intelligentmessaging.mailserver.components.DSLHandler
 import com.poly.intelligentmessaging.mailserver.domain.dto.*
 import com.poly.intelligentmessaging.mailserver.domain.models.AttributeModel
 import com.poly.intelligentmessaging.mailserver.domain.models.GroupAttributesModel
+import com.poly.intelligentmessaging.mailserver.domain.models.NotificationModel
 import com.poly.intelligentmessaging.mailserver.domain.models.StudentModel
 import com.poly.intelligentmessaging.mailserver.domain.projections.AttributeProjection
 import com.poly.intelligentmessaging.mailserver.repositories.AttributeRepository
@@ -34,6 +35,9 @@ class AttributeService {
 
     @Autowired
     private val dslHandler: DSLHandler? = null
+
+    @Autowired
+    private val notificationService: NotificationService? = null
 
     fun getAttributes(idStaff: String): List<AttributesDTO> {
         val attributes = attributeRepository!!.getAttributes(idStaff)
@@ -139,31 +143,46 @@ class AttributeService {
     }
 
     fun shareAttribute(shareDTO: ShareDTO): ShareDTO {
-        val attribute = attributeRepository!!.findById(UUID.fromString(shareDTO.id)).get()
-        var expression: String? = null
-        if (attribute.expression != null) {
-            val groupExpr = attribute.group!!.name!!.lowercase().replace("\\s+".toRegex(), "_")
-            val attrExpr = attribute.name!!.lowercase().replace("\\s+".toRegex(), "_")
-            expression = "$groupExpr[$attrExpr]"
+        return notificationService!!.createNotifications(shareDTO, false)
+    }
+
+    fun acceptNotification(notification: NotificationModel, type: String) {
+        if (type == "link") linkAttribute(notification)
+        if (type == "copy") copyAttribute(notification)
+    }
+
+    fun linkAttribute(notification: NotificationModel) {
+        val consumer = notification.consumer!!
+        val attribute = notification.attribute!!
+        val producerGroupName = attribute.group!!.name!!
+        var attributeName = attribute.name!!
+        var group = consumer.groups!!.find { it.name!!.lowercase() == producerGroupName.lowercase() }
+        if (group == null) {
+            group = groupAttributesRepository!!.save(GroupAttributesModel(staff = consumer, name = producerGroupName))
+        } else if (group.attributes != null && group.attributes!!.isNotEmpty()) {
+            val (counter, name) = checkAttributeName(0, attributeName, group.attributes!!)
+            attributeName = "$name$counter"
         }
-        for (staffId in shareDTO.staffIds!!) {
-            val staff = staffRepository!!.findById(UUID.fromString(staffId)).get()
-            val groupReference = attribute.group!!
-            val students = mutableSetOf<StudentModel>()
-            attribute.students!!.forEach { students.add(it) }
-            val group = staff.groups!!.find { it.name == groupReference.name }
-            val attributeModel = AttributeModel(
-                staff = staff,
-                group = group ?: groupAttributesRepository!!.save(
-                    GroupAttributesModel(staff = staff, name = groupReference.name)
-                ),
-                name = attribute.name,
-                expression = expression,
-                students = students
-            )
-            attributeRepository.save(attributeModel)
-        }
-        return shareDTO
+        val producer = notification.producer!!
+        val newAttribute = AttributeModel(
+            staff = consumer,
+            producer = producer,
+            group = group,
+            name = attributeName,
+            expression = attribute.expression
+        )
+        attributeRepository!!.save(newAttribute)
+    }
+
+    private fun checkAttributeName(counter: Int, name: String, attributes: Set<AttributeModel>): Pair<String, Int> {
+        val newName = if (counter == 0) name else "$name$counter"
+        val containsName = attributes.find { it.name!!.lowercase() == newName.lowercase() } != null
+        return if (!containsName) name to counter
+        else checkAttributeName(counter + 1, name, attributes)
+    }
+
+    fun copyAttribute(notification: NotificationModel) {
+        TODO()
     }
 
 //    fun getAttributesFromExpression(attribute: AttributeModel, ownerAttributes: String): Set<AttributeModel> {

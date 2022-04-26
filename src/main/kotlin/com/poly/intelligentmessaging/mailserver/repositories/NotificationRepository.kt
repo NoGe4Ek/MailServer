@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface NotificationRepository : JpaRepository<NotificationModel, UUID>
+interface NotificationRepository : JpaRepository<NotificationModel, UUID> {
+    fun findByConsumerId(consumerId: UUID): Set<NotificationModel>
+}
