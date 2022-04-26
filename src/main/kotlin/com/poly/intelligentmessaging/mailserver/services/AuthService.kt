@@ -4,7 +4,11 @@ import com.poly.intelligentmessaging.mailserver.components.EmailBox
 import com.poly.intelligentmessaging.mailserver.configuration.jwt.JwtTokenProvider
 import com.poly.intelligentmessaging.mailserver.domain.dto.AuthRequestDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.AuthResponseDTO
+import com.poly.intelligentmessaging.mailserver.domain.dto.NewStaffDTO
+import com.poly.intelligentmessaging.mailserver.domain.models.AccessModel
+import com.poly.intelligentmessaging.mailserver.repositories.AccessRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
+import com.poly.intelligentmessaging.mailserver.util.generatePassword
 import io.jsonwebtoken.ExpiredJwtException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
@@ -14,7 +18,6 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
-import kotlin.random.Random
 
 @Service
 class AuthService {
@@ -27,6 +30,9 @@ class AuthService {
 
     @Autowired
     private val staffRepository: StaffRepository? = null
+
+    @Autowired
+    private val accessRepository: AccessRepository? = null
 
     @Autowired
     private val bCryptPasswordEncoder: BCryptPasswordEncoder? = null
@@ -67,18 +73,20 @@ class AuthService {
         val newPassword = generatePassword()
         staff.password = bCryptPasswordEncoder!!.encode(newPassword)
         staffRepository.save(staff)
-        emailBox!!.sendNoReply(newPassword, person.email!!)
+        emailBox!!.sendNoReply(newPassword, person.email!!, false)
         return authRequestDTO
     }
 
-    private fun generatePassword(): String {
-        val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*?."
-        val password = StringBuilder()
-        for (i in 0 until 12) {
-            val isUpper = Random.nextInt(2)
-            val symbol = alphabet[Random.nextInt(0, alphabet.length)]
-            password.append(if (isUpper == 0 && symbol.isLetter()) symbol.lowercase() else symbol)
-        }
-        return password.toString()
+    fun getAccess(newStaffDTO: NewStaffDTO): NewStaffDTO {
+        val access = AccessModel(
+            lastName = newStaffDTO.lastName,
+            firstName = newStaffDTO.firstName,
+            patronymic = newStaffDTO.patronymic,
+            email = newStaffDTO.email,
+            department = newStaffDTO.department,
+            highSchool = newStaffDTO.highSchool
+        )
+        accessRepository!!.save(access)
+        return newStaffDTO
     }
 }

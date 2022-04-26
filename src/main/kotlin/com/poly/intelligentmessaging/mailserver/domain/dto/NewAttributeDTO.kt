@@ -1,6 +1,7 @@
 package com.poly.intelligentmessaging.mailserver.domain.dto
 
 data class NewAttributeDTO(
+    val idStaff: String? = null,
     val idAttribute: String? = null,
     val name: String? = null,
     val groupName: String? = null,

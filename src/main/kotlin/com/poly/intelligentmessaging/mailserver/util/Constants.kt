@@ -1,4 +1,5 @@
 package com.poly.intelligentmessaging.mailserver.util
 
-const val EMAIL_FORWARDER_EXCEPTION_MESSAGE = "EmailForwarder not found"
-const val EMAIL_SENDER_EXCEPTION_MESSAGE = "EmailSender not found"
+const val ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*?."
+
+const val BASIC_ID_STAFF = "ad7a8951-2f95-4619-802b-1285c3279623"

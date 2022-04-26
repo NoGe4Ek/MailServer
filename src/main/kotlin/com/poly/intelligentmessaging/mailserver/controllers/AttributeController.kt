@@ -8,16 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/attributes")
 class AttributeController {
-
-    private val basicIdStaff = "ad7a8951-2f95-4619-802b-1285c3279623"
-
-    private val currentStaff = "9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b"
-//    private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
 
     @Autowired
     val groupAttributesService: GroupAttributesService? = null
@@ -25,47 +23,44 @@ class AttributeController {
     @Autowired
     val attributesService: AttributeService? = null
 
-    @GetMapping("/getGroupAttributes")
-    fun getGroupAttributes(): ResponseEntity<MutableSet<GroupAttributeDTO>> {
-        return ResponseEntity(groupAttributesService!!.getGroupAttributes(currentStaff, basicIdStaff), HttpStatus.OK)
+    @PostMapping("/getGroupAttributes", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getGroupAttributes(@RequestBody staffDTO: StaffDTO): ResponseEntity<MutableSet<GroupAttributeDTO>> {
+        return ResponseEntity(groupAttributesService!!.getGroupAttributes(staffDTO.id!!), HttpStatus.OK)
     }
 
-    @GetMapping("/getAttributes")
-    fun getAttributes(): ResponseEntity<List<AttributesDTO>> {
-        return ResponseEntity(attributesService!!.getAttributes(currentStaff), HttpStatus.OK)
+    @PostMapping("/getAttributes", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getAttributes(@RequestBody staffDTO: StaffDTO): ResponseEntity<List<AttributesDTO>> {
+        return ResponseEntity(attributesService!!.getAttributes(staffDTO.id!!), HttpStatus.OK)
     }
 
-    @GetMapping("/getAttributesCurrentStaff")
-    fun getAttributesCurrentStaff(): ResponseEntity<List<AttributesDTO>> {
-        return ResponseEntity(attributesService!!.getAttributesCurrentStaff(currentStaff), HttpStatus.OK)
+    @PostMapping("/getAttributesCurrentStaff", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getAttributesCurrentStaff(@RequestBody staffDTO: StaffDTO): ResponseEntity<List<AttributesDTO>> {
+        return ResponseEntity(attributesService!!.getAttributesCurrentStaff(staffDTO.id!!), HttpStatus.OK)
     }
 
-    @GetMapping("/getGroupNames")
-    fun getGroupNames(): ResponseEntity<MutableList<GroupNameProjection>> {
-        return ResponseEntity(groupAttributesService!!.getGroupNames(currentStaff), HttpStatus.OK)
+    @PostMapping("/getGroupNames", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getGroupNames(@RequestBody staffDTO: StaffDTO): ResponseEntity<MutableList<GroupNameProjection>> {
+        return ResponseEntity(groupAttributesService!!.getGroupNames(staffDTO.id!!), HttpStatus.OK)
     }
 
-    @GetMapping("/getGroupNamesCurrentStaff")
-    fun getGroupNamesCurrentStaff(): ResponseEntity<MutableList<GroupNameProjection>> {
-        return ResponseEntity(groupAttributesService!!.getGroupNamesCurrentStaff(currentStaff), HttpStatus.OK)
+    @PostMapping("/getGroupNamesCurrentStaff", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getGroupNamesCurrentStaff(@RequestBody staffDTO: StaffDTO): ResponseEntity<MutableList<GroupNameProjection>> {
+        return ResponseEntity(groupAttributesService!!.getGroupNamesCurrentStaff(staffDTO.id!!), HttpStatus.OK)
     }
 
     @PostMapping("/createGroupName", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun createGroupName(@RequestBody groupAttributeNameDTO: GroupAttributeNameDTO): ResponseEntity<GroupAttributeNameDTO> {
-        return ResponseEntity(
-            groupAttributesService!!.createGroupName(groupAttributeNameDTO, currentStaff),
-            HttpStatus.CREATED
-        )
+        return ResponseEntity(groupAttributesService!!.createGroupName(groupAttributeNameDTO), HttpStatus.CREATED)
     }
 
     @PostMapping("/createAttribute", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun createAttribute(@RequestBody newAttributeDTO: NewAttributeDTO): ResponseEntity<NewAttributeDTO> {
-        return ResponseEntity(attributesService!!.createAttribute(newAttributeDTO, currentStaff), HttpStatus.CREATED)
+        return ResponseEntity(attributesService!!.createAttribute(newAttributeDTO), HttpStatus.CREATED)
     }
 
     @PostMapping("/updateAttribute", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun updateAttribute(@RequestBody newAttributeDTO: NewAttributeDTO): ResponseEntity<NewAttributeDTO> {
-        return ResponseEntity(attributesService!!.updateAttribute(newAttributeDTO, currentStaff), HttpStatus.CREATED)
+        return ResponseEntity(attributesService!!.updateAttribute(newAttributeDTO), HttpStatus.CREATED)
     }
 
     @PostMapping("/deleteAttribute", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -85,7 +80,7 @@ class AttributeController {
 
     @PostMapping("/calculate", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun calculate(@RequestBody expressionDTO: ExpressionDTO): ResponseEntity<ComputedExpressionDTO> {
-        return ResponseEntity(attributesService!!.calculateExpression(expressionDTO, currentStaff), HttpStatus.OK)
+        return ResponseEntity(attributesService!!.calculateExpression(expressionDTO), HttpStatus.OK)
     }
 
     @PostMapping("/getAttributeById", produces = [MediaType.APPLICATION_JSON_VALUE])

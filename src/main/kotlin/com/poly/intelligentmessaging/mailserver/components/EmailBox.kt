@@ -3,10 +3,12 @@ package com.poly.intelligentmessaging.mailserver.components
 import com.poly.intelligentmessaging.mailserver.configuration.MailProperties
 import com.poly.intelligentmessaging.mailserver.domain.MessageFields
 import com.poly.intelligentmessaging.mailserver.util.EmailAuthenticator
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Component
+import javax.mail.AuthenticationFailedException
 import javax.mail.Flags
 import javax.mail.Folder
 import javax.mail.Session
@@ -23,6 +25,8 @@ class EmailBox {
     @Autowired
     val mailSenderFactoryImpl: MailSenderFactoryImpl? = null
 
+    private val logger = LoggerFactory.getLogger(EmailBox::class.java)
+
     fun getEmails(auth: EmailAuthenticator, recipients: Set<String>) {
         val folder = getInbox(auth)!!
         val sender = mailSenderFactoryImpl!!.getSender(auth.login, auth.password)
@@ -32,11 +36,16 @@ class EmailBox {
     }
 
     fun getNumberOfMails(auth: EmailAuthenticator): Int {
-        val inbox = getInbox(auth) ?: return 0
-        inbox.open(Folder.READ_ONLY)
-        val count = inbox.messageCount
-        inbox.close()
-        return count
+        try {
+            val inbox = getInbox(auth) ?: return 0
+            inbox.open(Folder.READ_ONLY)
+            val count = inbox.messageCount
+            inbox.close()
+            return count
+        } catch (e: AuthenticationFailedException) {
+            logger.error("AuthenticationFailedException - login: [${auth.login}]")
+            return 0
+        }
     }
 
     fun sendEmails(auth: EmailAuthenticator, recipients: Set<String>, senderAddress: String) {
@@ -47,14 +56,15 @@ class EmailBox {
         folder.close()
     }
 
-    fun sendNoReply(password: String, recipient: String) {
+    fun sendNoReply(password: String, recipient: String, isNew: Boolean) {
         val noReply = "noreply@poly-sender.ru"
-        val sender = mailSenderFactoryImpl!!.getSender(noReply, "xOWx*%Wzom")
+        val sender = mailSenderFactoryImpl!!.getSender(noReply, "fon?gfMKUC%d")
         val mimeMessage = sender.createMimeMessage()
         val email = MimeMessageHelper(mimeMessage)
         email.setTo(recipient)
         email.setText(
             """
+    ${if (isNew) """Добро пожаловать в PolySender!""".trimIndent() else ""}
     ВНИМАНИЕ! Никому не сообщайте ваш пароль!
     
     Ваш новый пароль: $password
@@ -62,7 +72,7 @@ class EmailBox {
     
     С уважением, PolySender!""".trimIndent()
         )
-        email.setSubject("Изменение пароля")
+        email.setSubject(if (isNew) "Добро пожаловать!" else "Изменение пароля")
         email.setFrom(noReply)
         sender.send(mimeMessage)
     }

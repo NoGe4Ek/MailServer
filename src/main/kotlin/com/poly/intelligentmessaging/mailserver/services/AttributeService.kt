@@ -10,6 +10,7 @@ import com.poly.intelligentmessaging.mailserver.repositories.AttributeRepository
 import com.poly.intelligentmessaging.mailserver.repositories.GroupAttributesRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StudentRepository
+import com.poly.intelligentmessaging.mailserver.util.BASIC_ID_STAFF
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.sql.Timestamp
@@ -33,8 +34,6 @@ class AttributeService {
 
     @Autowired
     private val dslHandler: DSLHandler? = null
-
-    private val basicIdStaff = "ad7a8951-2f95-4619-802b-1285c3279623"
 
     fun getAttributes(idStaff: String): List<AttributesDTO> {
         val attributes = attributeRepository!!.getAttributes(idStaff)
@@ -93,14 +92,13 @@ class AttributeService {
         return listAttributesDTO.values.toList()
     }
 
-    fun createAttribute(newAttributeDTO: NewAttributeDTO, idStaff: String): NewAttributeDTO {
-        val students = mutableSetOf<StudentModel>()
-        newAttributeDTO.studentsId!!.forEach {
-            students.add(studentRepository!!.findById(UUID.fromString(it)).get())
-        }
-        val groupAttributeModel =
-            groupAttributesRepository!!.findByNameAndStaffId(newAttributeDTO.groupName!!, UUID.fromString(idStaff))
-        val staff = staffRepository!!.findById(UUID.fromString(idStaff)).get()
+    fun createAttribute(newAttributeDTO: NewAttributeDTO): NewAttributeDTO {
+        val students = getListStudentsByIds(newAttributeDTO.studentsId!!)
+        val groupAttributeModel = groupAttributesRepository!!.findByNameAndStaffId(
+            newAttributeDTO.groupName!!,
+            UUID.fromString(newAttributeDTO.idStaff)
+        )
+        val staff = staffRepository!!.findById(UUID.fromString(newAttributeDTO.idStaff)).get()
         val attributeModel = AttributeModel(
             staff = staff,
             name = newAttributeDTO.name,
@@ -113,13 +111,12 @@ class AttributeService {
         return newAttributeDTO
     }
 
-    fun updateAttribute(newAttributeDTO: NewAttributeDTO, idStaff: String): NewAttributeDTO {
-        val setStudents = mutableSetOf<StudentModel>()
-        newAttributeDTO.studentsId!!.forEach {
-            setStudents.add(studentRepository!!.findById(UUID.fromString(it)).get())
-        }
-        val groupAttributeModel =
-            groupAttributesRepository!!.findByNameAndStaffId(newAttributeDTO.groupName!!, UUID.fromString(idStaff))
+    fun updateAttribute(newAttributeDTO: NewAttributeDTO): NewAttributeDTO {
+        val setStudents = getListStudentsByIds(newAttributeDTO.studentsId!!)
+        val groupAttributeModel = groupAttributesRepository!!.findByNameAndStaffId(
+            newAttributeDTO.groupName!!,
+            UUID.fromString(newAttributeDTO.idStaff)
+        )
         val attributeModel = attributeRepository!!.findById(UUID.fromString(newAttributeDTO.idAttribute)).get()
         attributeModel.group = groupAttributeModel
         attributeModel.name = newAttributeDTO.name
@@ -128,6 +125,12 @@ class AttributeService {
         attributeModel.created = LocalDateTime.now()
         attributeRepository.save(attributeModel)
         return newAttributeDTO
+    }
+
+    private fun getListStudentsByIds(ids: MutableList<String>): Set<StudentModel> {
+        val students = mutableSetOf<StudentModel>()
+        ids.forEach { students.add(studentRepository!!.findById(UUID.fromString(it)).get()) }
+        return students
     }
 
     fun deleteAttribute(attributeIdDTO: AttributeIdDTO): AttributeIdDTO {
@@ -179,7 +182,7 @@ class AttributeService {
 //        return attributes
 //    }
 
-    fun calculateExpression(expressionDTO: ExpressionDTO, currentIdStaff: String): ComputedExpressionDTO {
-        return dslHandler!!.getComputedExpression(expressionDTO.expression!!, currentIdStaff, basicIdStaff)
+    fun calculateExpression(expressionDTO: ExpressionDTO): ComputedExpressionDTO {
+        return dslHandler!!.getComputedExpression(expressionDTO.expression!!, expressionDTO.idStaff!!, BASIC_ID_STAFF)
     }
 }

@@ -6,31 +6,31 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/filters")
 class FilterController {
 
-    private val currentStaff = "9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b"
-//    private val currentStaff = "725cee0f-7a95-4094-b19a-11b27f779490"
-
     @Autowired
     val filterService: FilterService? = null
 
-    @GetMapping("/getFilters")
-    fun getFilters(): ResponseEntity<List<FiltersDTO>> {
-        return ResponseEntity(filterService!!.getFilters(currentStaff, false), HttpStatus.OK)
+    @PostMapping("/getFilters", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getFilters(@RequestBody staffDTO: StaffDTO): ResponseEntity<List<FiltersDTO>> {
+        return ResponseEntity(filterService!!.getFilters(staffDTO.id!!, false), HttpStatus.OK)
     }
 
-    @GetMapping("/getFiltersShort")
-    fun getFiltersShort(): ResponseEntity<List<FiltersDTO>> {
-        return ResponseEntity(filterService!!.getFilters(currentStaff, true), HttpStatus.OK)
+    @PostMapping("/getFiltersShort")
+    fun getFiltersShort(@RequestBody staffDTO: StaffDTO): ResponseEntity<List<FiltersDTO>> {
+        return ResponseEntity(filterService!!.getFilters(staffDTO.id!!, true), HttpStatus.OK)
     }
 
     @PostMapping("/createFilter", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun createFilter(@RequestBody newFilterDTO: NewFilterDTO): ResponseEntity<NewFilterDTO> {
-        return ResponseEntity(filterService!!.createFilter(newFilterDTO, currentStaff), HttpStatus.CREATED)
+        return ResponseEntity(filterService!!.createFilter(newFilterDTO), HttpStatus.CREATED)
     }
 
     @PostMapping("/updateFilter", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -55,7 +55,7 @@ class FilterController {
 
     @PostMapping("/calculate", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun calculate(@RequestBody expressionDTO: ExpressionDTO): ResponseEntity<ComputedExpressionDTO> {
-        return ResponseEntity(filterService!!.calculateExpression(expressionDTO, currentStaff), HttpStatus.OK)
+        return ResponseEntity(filterService!!.calculateExpression(expressionDTO), HttpStatus.OK)
     }
 
     @PostMapping("/getFilterById", produces = [MediaType.APPLICATION_JSON_VALUE])

@@ -33,8 +33,6 @@ class AuthController {
 
     @PostMapping("/getAccess", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getAccess(@RequestBody newStaffDTO: NewStaffDTO): ResponseEntity<NewStaffDTO> {
-        return ResponseEntity(newStaffDTO, HttpStatus.OK)
+        return ResponseEntity(authService!!.getAccess(newStaffDTO), HttpStatus.OK)
     }
 }
-
-//    b0a32b95-afca-4ac0-bef1-f94be735e66c

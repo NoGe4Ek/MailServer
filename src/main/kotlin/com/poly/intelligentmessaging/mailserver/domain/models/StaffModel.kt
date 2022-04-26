@@ -44,7 +44,7 @@ data class StaffModel(
         joinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "id_role", referencedColumnName = "id")]
     )
-    val roles: Set<RoleModel>? = null
+    var roles: Set<RoleModel>? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

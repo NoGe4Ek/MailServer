@@ -19,6 +19,10 @@ data class RoleModel(
     @NonNull
     val name: String? = null,
 
+    @Column(name = "level")
+    @NonNull
+    val level: Int? = null,
+
     @CreationTimestamp
     @Column(name = "created")
     val created: LocalDateTime? = null,

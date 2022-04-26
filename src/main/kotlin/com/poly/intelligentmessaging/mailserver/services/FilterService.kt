@@ -12,6 +12,7 @@ import com.poly.intelligentmessaging.mailserver.repositories.EmailRepository
 import com.poly.intelligentmessaging.mailserver.repositories.FilterRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StudentRepository
+import com.poly.intelligentmessaging.mailserver.util.BASIC_ID_STAFF
 import com.poly.intelligentmessaging.mailserver.util.EmailAuthenticator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -40,8 +41,6 @@ class FilterService {
 
     @Autowired
     private val dslHandler: DSLHandler? = null
-
-    private val basicIdStaff = "ad7a8951-2f95-4619-802b-1285c3279623"
 
     fun getFilters(idStaff: String, isShort: Boolean): List<FiltersDTO> {
         val listFiltersDTO = mutableMapOf<String, FiltersDTO>()
@@ -100,13 +99,13 @@ class FilterService {
         )
     }
 
-    fun createFilter(newFilterDTO: NewFilterDTO, idStaff: String): NewFilterDTO {
+    fun createFilter(newFilterDTO: NewFilterDTO): NewFilterDTO {
         val students = mutableSetOf<StudentModel>()
         for (id in newFilterDTO.studentsId!!) {
             val studentModel = studentRepository!!.findById(UUID.fromString(id)).get()
             students.add(studentModel)
         }
-        val staff = staffRepository!!.findById(UUID.fromString(idStaff)).get()
+        val staff = staffRepository!!.findById(UUID.fromString(newFilterDTO.idStaff!!)).get()
 
         val (send, answer) = generateMailData(staff, newFilterDTO.name!!)
 
@@ -206,8 +205,8 @@ class FilterService {
         return shareDTO
     }
 
-    fun calculateExpression(expressionDTO: ExpressionDTO, currentIdStaff: String): ComputedExpressionDTO {
-        return dslHandler!!.getComputedExpression(expressionDTO.expression!!, currentIdStaff, basicIdStaff)
+    fun calculateExpression(expressionDTO: ExpressionDTO): ComputedExpressionDTO {
+        return dslHandler!!.getComputedExpression(expressionDTO.expression!!, expressionDTO.idStaff!!, BASIC_ID_STAFF)
     }
 
     private fun generateMailData(staff: StaffModel, filterName: String): Pair<EmailData, EmailData> {

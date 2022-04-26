@@ -1,6 +1,7 @@
 package com.poly.intelligentmessaging.mailserver.services
 
 
+import com.poly.intelligentmessaging.mailserver.domain.dto.StaffDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.StudentsDTO
 import com.poly.intelligentmessaging.mailserver.repositories.StudentRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,9 +13,9 @@ class StudentService {
     @Autowired
     var studentRepository: StudentRepository? = null
 
-    fun getAllStudents(idStaff: String): List<StudentsDTO> {
+    fun getAllStudents(staffDTO: StaffDTO): List<StudentsDTO> {
         val listStudentsDTO = mutableMapOf<String, StudentsDTO>()
-        val students = studentRepository!!.findAllStudents(idStaff)
+        val students = studentRepository!!.findAllStudents(staffDTO.id!!)
 
         for (student in students) {
             val studentId = student.getId()
