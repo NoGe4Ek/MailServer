@@ -6,8 +6,9 @@ data class AttributesDTO(
     val groupName: String,
     val expression: String? = null,
     val type: String,
+    val copy: Boolean,
     val created: String,
-    val students: MutableList<String> = mutableListOf(),
+    val students: Set<String> = mutableSetOf(),
     val studentsDTO: MutableSet<StudentsDTO> = mutableSetOf(),
     val status: String? = null
 )

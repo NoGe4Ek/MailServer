@@ -42,6 +42,9 @@ data class FilterModel(
     @Column(name = "expression")
     var expression: String? = null,
 
+    @Column(name = "copy")
+    val copy: Boolean? = null,
+
     @CreationTimestamp
     @Column(name = "created")
     var created: LocalDateTime? = null,

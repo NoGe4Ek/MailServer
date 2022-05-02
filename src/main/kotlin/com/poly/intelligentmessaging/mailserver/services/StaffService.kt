@@ -109,6 +109,7 @@ class StaffService {
         val notification = notificationRepository!!.findById(UUID.fromString(nrDTO.idNotification)).get()
         if (notification.filter != null) filterService!!.acceptNotification(notification, nrDTO.type!!)
         else attributeService!!.acceptNotification(notification, nrDTO.type!!)
+        notificationRepository.deleteById(UUID.fromString(nrDTO.idNotification))
         return nrDTO
     }
 

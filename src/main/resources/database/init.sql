@@ -83,16 +83,17 @@ CREATE TABLE filter
 (
     id              UUID PRIMARY KEY,
     id_staff        UUID        NOT NULL,
-    id_producer     UUID,
+    id_dependency   UUID,
     id_email_send   UUID        NOT NULL,
     id_email_answer UUID        NOT NULL,
     name            TEXT        NOT NULL,
     mode            TEXT        NOT NULL,
     auto_forward    BOOLEAN     NOT NULL,
     expression      TEXT,
+    copy            BOOLEAN     NOT NULL DEFAULT FALSE,
     created         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (id_staff) REFERENCES staff (id),
-    FOREIGN KEY (id_producer) REFERENCES staff (id),
+    FOREIGN KEY (id_dependency) REFERENCES filter (id),
     FOREIGN KEY (id_email_send) REFERENCES email (id),
     FOREIGN KEY (id_email_answer) REFERENCES email (id)
 );
@@ -110,13 +111,14 @@ CREATE TABLE attribute
 (
     id                 UUID PRIMARY KEY,
     id_staff           UUID        NOT NULL,
-    id_producer        UUID,
+    id_dependency      UUID,
     id_group_attribute UUID,
     name               TEXT        NOT NULL,
     expression         TEXT,
+    copy               BOOLEAN     NOT NULL DEFAULT FALSE,
     created            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (id_staff) REFERENCES staff (id),
-    FOREIGN KEY (id_producer) REFERENCES staff (id),
+    FOREIGN KEY (id_dependency) REFERENCES attribute (id),
     FOREIGN KEY (id_group_attribute) REFERENCES group_attributes (id)
 );
 

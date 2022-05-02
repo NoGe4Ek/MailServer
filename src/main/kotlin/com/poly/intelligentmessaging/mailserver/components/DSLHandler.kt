@@ -2,13 +2,15 @@ package com.poly.intelligentmessaging.mailserver.components
 
 import com.poly.intelligentmessaging.mailserver.domain.dto.ComputedExpressionDTO
 import com.poly.intelligentmessaging.mailserver.domain.dto.StudentsDTO
+import com.poly.intelligentmessaging.mailserver.domain.models.AttributeModel
 import com.poly.intelligentmessaging.mailserver.domain.models.GroupAttributesModel
+import com.poly.intelligentmessaging.mailserver.domain.models.StaffModel
 import com.poly.intelligentmessaging.mailserver.domain.models.StudentModel
-import com.poly.intelligentmessaging.mailserver.domain.projections.AttributeProjection
 import com.poly.intelligentmessaging.mailserver.exceptions.ValidationException
 import com.poly.intelligentmessaging.mailserver.repositories.AttributeRepository
 import com.poly.intelligentmessaging.mailserver.repositories.GroupAttributesRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StudentRepository
+import com.poly.intelligentmessaging.mailserver.util.BASIC_ID_STAFF
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.sql.Timestamp
@@ -42,60 +44,59 @@ class DSLHandler {
         return ComputedExpressionDTO(status, studentsDTO)
     }
 
-    fun getStatus(
-        created: LocalDateTime,
-        expression: String,
-        idStaff: String
-    ): String {
-        val attributes = attributeRepository!!.getAttributes(idStaff)
-        var (status, listAttributeFromExpression) = getAttributesFromExpression(expression, attributes)
+    fun getStatus(created: LocalDateTime, expression: String, idStaff: String): String {
+        var (status, attributes) = getStatusAndAttributes(expression, idStaff)
         if (status == "error") return status
-        val finder = listAttributeFromExpression.find {
-            created < Timestamp.valueOf(it.getCreated()).toLocalDateTime()
+        val finder = attributes.find {
+            val localCreated: LocalDateTime = if (it.dependency == null) it.created!! else it.dependency.created!!
+            created < Timestamp.valueOf(localCreated).toLocalDateTime()
         }
         if (finder != null) status = "warning"
         return status
     }
 
-    fun getAttributesFromExpression(expression: String): MutableMap<String, MutableSet<String>> {
-        val groupToAttributes = mutableMapOf<String, MutableSet<String>>()
+    fun getAttributeModelsFromExpression(expr: String, producer: StaffModel): Set<AttributeModel> {
+        val attributes = mutableSetOf<AttributeModel>()
         var position = 0
+        val expression = expr.replace(Regex("""\s+"""), "")
         while (position < expression.length) {
             val (token, newPosition) = getToken(position, expression)
-            if (token.length == 1) continue
-            val (group, args) = getGroupAndAttr(token)
-            if (groupToAttributes.containsKey(group)) groupToAttributes[group]!!.add(args)
-            else groupToAttributes[group] = mutableSetOf(args)
             position = newPosition
+            if (token.length == 1) continue
+            val (group, attr) = getGroupAndAttr(token)
+            val attribute = getAttrByName(producer.attributes!!, group, attr)
+            if (attribute != null) attributes.add(attribute)
         }
-        return groupToAttributes
+        return attributes
     }
 
-    private fun getAttributesFromExpression(
-        expr: String,
-        attributes: List<AttributeProjection>
-    ): Pair<String, Set<AttributeProjection>> {
-        val expression = expr.replace(Regex("""\s+"""), "")
-        val attributesFromExpression = mutableSetOf<AttributeProjection>()
+    private fun getStatusAndAttributes(expr: String, idStaff: String): Pair<String, Set<AttributeModel>> {
+        val resultSample = mutableSetOf<AttributeModel>()
+        val attributes = attributeRepository!!.findAllByStaffIdOrStaffId(
+            UUID.fromString(idStaff),
+            UUID.fromString(BASIC_ID_STAFF)
+        )
         var position = 0
+        val expression = expr.replace(Regex("""\s+"""), "")
         while (position < expression.length) {
             val (token, newPosition) = getToken(position, expression)
-            if (token.length > 1) {
-                val groupAndAttribute = token.split("[")
-                val group = groupAndAttribute[0]
-                val attribute = groupAndAttribute[1].replace("]", "")
-                val finder = attributes.find {
-                    val attributeCondition =
-                        it.getAttributeName().lowercase().replace("\\s+".toRegex(), "_") == attribute
-                    val groupCondition = it.getGroupName().lowercase().replace("\\s+".toRegex(), "_") == group
-                    attributeCondition && groupCondition
-                } ?: return "error" to setOf()
-                attributesFromExpression.add(finder)
-            }
             position = newPosition
+            if (token.length == 1) continue
+            val (group, attr) = getGroupAndAttr(token)
+            val attribute = getAttrByName(attributes, group, attr) ?: return "error" to setOf()
+            resultSample.add(attribute)
         }
-        return "success" to attributesFromExpression
+        return "success" to resultSample.toSet()
     }
+
+    private fun getAttrByName(attributes: Set<AttributeModel>, groupName: String, attrName: String): AttributeModel? {
+        return attributes.find {
+            val currentGroupName = it.group!!.name!!.lowercase()
+            val currentAttributeName = it.name!!.lowercase()
+            currentGroupName == groupName && currentAttributeName == attrName
+        }
+    }
+
 
     fun validationExpression(expression: String, groupAttributes: Set<GroupAttributesModel>): Boolean {
         var position = 0
@@ -285,5 +286,35 @@ class DSLHandler {
             args = args.replace("_", " ")
         }
         return group to args
+    }
+
+    fun refactoringExpression(expr: String, groups: Map<String, String>, attrs: Map<String, String>): String {
+        val expression = expr.replace(Regex("""\s+"""), "")
+        val newExpression = StringBuilder()
+        var position = 0
+        while (position < expression.length) {
+            val (token, newPosition) = getToken(position, expression)
+            position = newPosition
+            if (token.length == 1) {
+                newExpression.append(token)
+                continue
+            }
+            val (group, attr) = getGroupAndAttr(token)
+            if (groups[group] != null) {
+                val newName = (groups[group] + "[").replace(" ", "_")
+                newExpression.append(newName)
+            } else {
+                val newName = "$group[".replace(" ", "_")
+                newExpression.append(newName)
+            }
+            if (attrs[attr] != null) {
+                val newName = (attrs[attr] + "]").replace(" ", "_")
+                newExpression.append(newName)
+            } else {
+                val newName = "$attr]".replace(" ", "_")
+                newExpression.append(newName)
+            }
+        }
+        return newExpression.toString()
     }
 }

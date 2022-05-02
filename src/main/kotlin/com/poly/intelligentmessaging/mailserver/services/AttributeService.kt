@@ -2,11 +2,7 @@ package com.poly.intelligentmessaging.mailserver.services
 
 import com.poly.intelligentmessaging.mailserver.components.DSLHandler
 import com.poly.intelligentmessaging.mailserver.domain.dto.*
-import com.poly.intelligentmessaging.mailserver.domain.models.AttributeModel
-import com.poly.intelligentmessaging.mailserver.domain.models.GroupAttributesModel
-import com.poly.intelligentmessaging.mailserver.domain.models.NotificationModel
-import com.poly.intelligentmessaging.mailserver.domain.models.StudentModel
-import com.poly.intelligentmessaging.mailserver.domain.projections.AttributeProjection
+import com.poly.intelligentmessaging.mailserver.domain.models.*
 import com.poly.intelligentmessaging.mailserver.repositories.AttributeRepository
 import com.poly.intelligentmessaging.mailserver.repositories.GroupAttributesRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
@@ -39,9 +35,47 @@ class AttributeService {
     @Autowired
     private val notificationService: NotificationService? = null
 
-    fun getAttributes(idStaff: String): List<AttributesDTO> {
-        val attributes = attributeRepository!!.getAttributes(idStaff)
-        return attributesConvertToDTO(attributes, idStaff)
+    fun getAttributes(idStaff: String): Set<AttributesDTO> {
+        val attributes = attributeRepository!!.findAllByStaffIdOrStaffId(
+            UUID.fromString(idStaff),
+            UUID.fromString(BASIC_ID_STAFF)
+        )
+        return attributesConvertToDTO(attributes)
+    }
+
+    private fun getStudentsIdFromAttribute(attribute: AttributeModel): Set<String> {
+        return attribute.students!!.associateBy { it.id.toString() }.keys.toSet()
+    }
+
+    fun getAttributesCurrentStaff(idStaff: String): Set<AttributesDTO> {
+        val attributes = attributeRepository!!.findAllByStaffId(UUID.fromString(idStaff))
+        return attributesConvertToDTO(attributes)
+    }
+
+    private fun attributesConvertToDTO(attributes: Set<AttributeModel>): Set<AttributesDTO> {
+        val resultSample = mutableSetOf<AttributesDTO>()
+        for (attribute in attributes) {
+            val expression = attribute.expression
+            val type = if (expression == null) "list" else "expression"
+            val localCreated = if (attribute.dependency != null) attribute.dependency.created!! else attribute.created!!
+            val status = if (type == "expression" && attribute.dependency == null) {
+                val createdLocalDateTime = Timestamp.valueOf(localCreated).toLocalDateTime()
+                dslHandler!!.getStatus(createdLocalDateTime, expression!!, attribute.staff!!.id.toString())
+            } else "success"
+            val attributesDTO = AttributesDTO(
+                id = attribute.id.toString(),
+                attributeName = attribute.name!!,
+                groupName = attribute.group!!.name!!,
+                expression = expression,
+                type = type,
+                copy = attribute.copy!!,
+                created = localCreated.toLocalDate().toString(),
+                students = getStudentsIdFromAttribute(attribute.dependency ?: attribute),
+                status = status,
+            )
+            resultSample.add(attributesDTO)
+        }
+        return resultSample
     }
 
     fun getAttributeById(attributeIdDTO: AttributeIdDTO): AttributesDTO {
@@ -50,8 +84,9 @@ class AttributeService {
             id = attribute.id.toString(),
             attributeName = attribute.name!!,
             groupName = attribute.group!!.name!!,
-            type = if (attribute.expression == null) "list" else "expression",
             expression = attribute.expression,
+            type = if (attribute.expression == null) "list" else "expression",
+            copy = attribute.copy!!,
             created = attribute.created.toString(),
             studentsDTO = attribute.students!!.associateBy {
                 StudentsDTO(
@@ -61,39 +96,6 @@ class AttributeService {
                 )
             }.keys.toMutableSet()
         )
-    }
-
-    fun getAttributesCurrentStaff(idStaff: String): List<AttributesDTO> {
-        val attributes = attributeRepository!!.getAttributesCurrentStaff(idStaff)
-        return attributesConvertToDTO(attributes, idStaff)
-    }
-
-    private fun attributesConvertToDTO(
-        attributes: MutableList<AttributeProjection>,
-        idStaff: String
-    ): List<AttributesDTO> {
-        val listAttributesDTO = mutableMapOf<String, AttributesDTO>()
-        for (attribute in attributes) {
-            val id = attribute.getId()
-            if (listAttributesDTO.containsKey(id)) {
-                listAttributesDTO[id]!!.students.add(attribute.getStudentId())
-            } else {
-                val attributeName = attribute.getAttributeName()
-                val groupName = attribute.getGroupName()
-                val expression = attribute.getExpression()
-                val type = if (attribute.getExpression() == null) "list" else "expression"
-                val status = if (type == "expression") {
-                    val createdLocalDateTime = Timestamp.valueOf(attribute.getCreated()).toLocalDateTime()
-                    dslHandler!!.getStatus(createdLocalDateTime, expression!!, idStaff)
-                } else "success"
-                val created = attribute.getCreated().split(" ")[0]
-                val attributesDTO =
-                    AttributesDTO(id, attributeName, groupName, expression, type, created, status = status)
-                attributesDTO.students.add(attribute.getStudentId())
-                listAttributesDTO[id] = attributesDTO
-            }
-        }
-        return listAttributesDTO.values.toList()
     }
 
     fun createAttribute(newAttributeDTO: NewAttributeDTO): NewAttributeDTO {
@@ -108,6 +110,7 @@ class AttributeService {
             name = newAttributeDTO.name,
             expression = if (newAttributeDTO.expression == "") null else newAttributeDTO.expression,
             group = groupAttributeModel,
+            copy = false,
             students = students
         )
         println("created: $newAttributeDTO")
@@ -154,24 +157,74 @@ class AttributeService {
     fun linkAttribute(notification: NotificationModel) {
         val consumer = notification.consumer!!
         val attribute = notification.attribute!!
+        val (group, attributeName) = selectGroupAndAttributeNames(attribute, consumer)
+        val newAttribute = AttributeModel(
+            staff = consumer,
+            dependency = attribute,
+            group = group,
+            name = attributeName,
+            expression = attribute.expression,
+            copy = true
+        )
+        attributeRepository!!.save(newAttribute)
+    }
+
+    private fun copyAttribute(notification: NotificationModel) {
+        val attribute = notification.attribute!!
+        val cascadeAttributes = cascadeOpeningExpression(setOf(attribute)).sortedBy { it.created }
+        val oldAndNewGroupNames = mutableMapOf<String, String>()
+        val oldAndNewAttrNames = mutableMapOf<String, String>()
+        for (attr in cascadeAttributes) {
+            val consumer = notification.consumer!!
+            val (group, attributeName) = selectGroupAndAttributeNames(attr, consumer)
+            oldAndNewGroupNames[attr.group!!.name!!] = group!!.name!!
+            oldAndNewAttrNames[attr.name!!] = attributeName
+            var expression = attr.expression
+            if (expression != null) {
+                expression = dslHandler!!.refactoringExpression(expression, oldAndNewGroupNames, oldAndNewAttrNames)
+            }
+            val students = mutableSetOf<StudentModel>()
+            attr.students!!.forEach { students.add(it) }
+            val newAttribute = AttributeModel(
+                staff = consumer,
+                dependency = attr.dependency,
+                group = group,
+                name = attributeName,
+                expression = expression,
+                copy = attr.copy,
+                students = students
+            )
+            attributeRepository!!.save(newAttribute)
+        }
+    }
+
+    fun cascadeOpeningExpression(attributes: Set<AttributeModel>): Set<AttributeModel> {
+        val attrs = attributes.toMutableSet()
+        for (attribute in attributes) {
+            val expression = attribute.expression
+            if (expression != null) {
+                val producer = attribute.staff!!
+                val attrFromExpr = dslHandler!!.getAttributeModelsFromExpression(expression, producer)
+                attrs.addAll(cascadeOpeningExpression(attrFromExpr))
+            }
+        }
+        return attrs.toSet()
+    }
+
+    private fun selectGroupAndAttributeNames(
+        attribute: AttributeModel,
+        consumer: StaffModel
+    ): Pair<GroupAttributesModel?, String> {
         val producerGroupName = attribute.group!!.name!!
         var attributeName = attribute.name!!
         var group = consumer.groups!!.find { it.name!!.lowercase() == producerGroupName.lowercase() }
         if (group == null) {
             group = groupAttributesRepository!!.save(GroupAttributesModel(staff = consumer, name = producerGroupName))
         } else if (group.attributes != null && group.attributes!!.isNotEmpty()) {
-            val (counter, name) = checkAttributeName(0, attributeName, group.attributes!!)
-            attributeName = "$name$counter"
+            val (name, counter) = checkAttributeName(0, attributeName, group.attributes!!)
+            attributeName = if (counter == 0) name else "$name$counter"
         }
-        val producer = notification.producer!!
-        val newAttribute = AttributeModel(
-            staff = consumer,
-            producer = producer,
-            group = group,
-            name = attributeName,
-            expression = attribute.expression
-        )
-        attributeRepository!!.save(newAttribute)
+        return group to attributeName
     }
 
     private fun checkAttributeName(counter: Int, name: String, attributes: Set<AttributeModel>): Pair<String, Int> {
@@ -180,26 +233,6 @@ class AttributeService {
         return if (!containsName) name to counter
         else checkAttributeName(counter + 1, name, attributes)
     }
-
-    fun copyAttribute(notification: NotificationModel) {
-        TODO()
-    }
-
-//    fun getAttributesFromExpression(attribute: AttributeModel, ownerAttributes: String): Set<AttributeModel> {
-//        val expression = attribute.expression!!
-//        val groupAndAttributes = dslHandler!!.getAttributesFromExpression(expression)
-//        val attributes = mutableSetOf<AttributeModel>()
-//        groupAndAttributes.forEach {
-//            val groupModel = groupAttributesRepository!!
-//                .findByNameAndStaffId(it.key, UUID.fromString(ownerAttributes))
-//            it.value.forEach { attr ->
-//                val attributeModel = attributeRepository!!
-//                    .findByIdStaffAndNameAndGroupAttribute(UUID.fromString(ownerAttributes), attr, groupModel)
-//                attributes.add(attributeModel)
-//            }
-//        }
-//        return attributes
-//    }
 
     fun calculateExpression(expressionDTO: ExpressionDTO): ComputedExpressionDTO {
         return dslHandler!!.getComputedExpression(expressionDTO.expression!!, expressionDTO.idStaff!!, BASIC_ID_STAFF)

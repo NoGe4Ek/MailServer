@@ -51,25 +51,25 @@ VALUES ('cd3e9ad6-5535-46d2-98b4-e2214583126f', 'ad7a8951-2f95-4619-802b-1285c32
 
 INSERT INTO attribute
 VALUES ('318511c1-e9b1-4597-8e93-b68149fd3657', 'ad7a8951-2f95-4619-802b-1285c3279623', null,
-        'a6d2f576-1c52-48f1-b092-5fe5dbfe860f', 'Российская Федерация', null);
+        'a6d2f576-1c52-48f1-b092-5fe5dbfe860f', 'Российская Федерация');
 INSERT INTO attribute
 VALUES ('eddbd202-c79a-45de-9d84-4de8f93fcb04', 'ad7a8951-2f95-4619-802b-1285c3279623', null,
-        'a6d2f576-1c52-48f1-b092-5fe5dbfe860f', 'Республика Ангола', null);
+        'a6d2f576-1c52-48f1-b092-5fe5dbfe860f', 'Республика Ангола');
 INSERT INTO attribute
 VALUES ('1cdf23fc-6a1d-4648-9c4f-a0f13ac8c60b', 'ad7a8951-2f95-4619-802b-1285c3279623', null,
-        'd68ca5d9-1124-4d3f-b192-cfd52c30449c', 'ИКНиТ / ВШИСиСТ', null);
+        'd68ca5d9-1124-4d3f-b192-cfd52c30449c', 'ИКНиТ / ВШИСиСТ');
 INSERT INTO attribute
 VALUES ('614b6832-4f19-40c4-b02a-dcc586892b47', 'ad7a8951-2f95-4619-802b-1285c3279623', null,
-        'b7a1e33d-505e-4350-9602-c3fdce0330ca', 'Бюджет', null);
+        'b7a1e33d-505e-4350-9602-c3fdce0330ca', 'Бюджет');
 INSERT INTO attribute
 VALUES ('d159c111-18cd-4413-a69c-2dc67b2bb7be', 'ad7a8951-2f95-4619-802b-1285c3279623', null,
-        'b7a1e33d-505e-4350-9602-c3fdce0330ca', 'Контракт', null);
+        'b7a1e33d-505e-4350-9602-c3fdce0330ca', 'Контракт');
 INSERT INTO attribute
 VALUES ('b41b2f91-cca9-41c1-9597-99a2416f1928', 'ad7a8951-2f95-4619-802b-1285c3279623', null,
-        'a429a404-5edc-450c-8445-96fc86ae77e7', '3530901/80203', null);
+        'a429a404-5edc-450c-8445-96fc86ae77e7', '3530901/80203');
 INSERT INTO attribute
 VALUES ('da45efeb-ac57-447b-b062-4c500d2675fa', 'ad7a8951-2f95-4619-802b-1285c3279623', null,
-        'a429a404-5edc-450c-8445-96fc86ae77e7', '3530901/80202', null);
+        'a429a404-5edc-450c-8445-96fc86ae77e7', '3530901/80202');
 
 INSERT INTO student
 VALUES ('8ff93425-b708-4f63-9792-91814ea2a2de',
@@ -110,71 +110,12 @@ VALUES ('41066575-4361-452a-b2f7-908831aeb240', 'd159c111-18cd-4413-a69c-2dc67b2
 INSERT INTO student_to_attribute
 VALUES ('41066575-4361-452a-b2f7-908831aeb240', 'da45efeb-ac57-447b-b062-4c500d2675fa');
 
-INSERT INTO email
-VALUES ('5a146b72-00aa-4b88-95de-8bd20ff9179f',
-        'filter1_send@poly-sender.ru',
-        'thisisfilter1',
-        '/filter1-send');
-
-INSERT INTO email
-VALUES ('43976846-fa85-4632-9f1e-405ae134ba75',
-        'filter1_answer@poly-sender.ru',
-        'thisisfilter1',
-        '/filter1-answer');
-
-INSERT INTO email
-VALUES ('59fc5c05-ab5d-4c15-a790-53185b4c3370',
-        'filter2_send@poly-sender.ru',
-        'thisisfilter2',
-        '/filter2-send');
-
-INSERT INTO email
-VALUES ('0a6fb05e-087d-47f6-890a-6abd4b1f5f89',
-        'filter2_answer@poly-sender.ru',
-        'thisisfilter2',
-        '/filter2-answer');
 
 INSERT INTO email
 VALUES ('b3b6a8f5-9fea-4f15-8fca-5519bd52a737',
         'noreply@poly-sender.ru',
         'fon?gfMKUC%d',
         '/noreply');
-
-INSERT INTO filter
-VALUES ('59cbc294-c52d-43b1-831d-66b1a4d04047',
-        '725cee0f-7a95-4094-b19a-11b27f779490',
-        null,
-        '5a146b72-00aa-4b88-95de-8bd20ff9179f',
-        '43976846-fa85-4632-9f1e-405ae134ba75',
-        'filter1',
-        'manual',
-        false);
-
-INSERT INTO filter
-VALUES ('4312bd25-aa7a-4924-ad39-e3ed997d9054',
-        '725cee0f-7a95-4094-b19a-11b27f779490',
-        null,
-        '59fc5c05-ab5d-4c15-a790-53185b4c3370',
-        '0a6fb05e-087d-47f6-890a-6abd4b1f5f89',
-        'filter2',
-        'auto',
-        true);
-
-INSERT INTO student_to_filter
-VALUES ('8ff93425-b708-4f63-9792-91814ea2a2de',
-        '59cbc294-c52d-43b1-831d-66b1a4d04047');
-
-INSERT INTO student_to_filter
-VALUES ('8ff93425-b708-4f63-9792-91814ea2a2de',
-        '4312bd25-aa7a-4924-ad39-e3ed997d9054');
-
-INSERT INTO student_to_filter
-VALUES ('33067576-4164-492a-a2f7-908831aeb240',
-        '59cbc294-c52d-43b1-831d-66b1a4d04047');
-
-INSERT INTO student_to_filter
-VALUES ('33067576-4164-492a-a2f7-908831aeb240',
-        '4312bd25-aa7a-4924-ad39-e3ed997d9054');
 
 INSERT INTO role
 VALUES ('6f8bcb5f-5fc4-4805-8314-f36904ef1eda', 'USER', 1);

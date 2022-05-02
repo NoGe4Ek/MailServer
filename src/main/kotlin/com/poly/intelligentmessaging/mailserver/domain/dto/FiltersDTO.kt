@@ -8,6 +8,7 @@ data class FiltersDTO(
     val type: String,
     val mode: String,
     val created: String,
+//    val copy: Boolean,
     val mailCounter: Int? = null,
     val students: MutableList<String> = mutableListOf(),
     val studentsDTO: MutableSet<StudentsDTO> = mutableSetOf(),

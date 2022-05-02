@@ -24,10 +24,9 @@ interface StudentRepository : JpaRepository<StudentModel, UUID> {
             inner join student_to_attribute sta on s.id = sta.id_student
             inner join attribute a on a.id = sta.id_attribute
             inner join group_attributes ga on a.id_group_attribute = ga.id
-            where cast(ga.id_staff as varchar) = 'ad7a8951-2f95-4619-802b-1285c3279623' 
-            or cast(ga.id_staff as varchar) = ?1
+            where cast(ga.id_staff as varchar) = ?2 or cast(ga.id_staff as varchar) = ?1
         """,
         nativeQuery = true
     )
-    fun findAllStudents(idStaff: String): MutableList<StudentProjection>
+    fun findAllStudents(idStaff: String, basicId: String): MutableSet<StudentProjection>
 }

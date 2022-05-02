@@ -29,12 +29,12 @@ class AttributeController {
     }
 
     @PostMapping("/getAttributes", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAttributes(@RequestBody staffDTO: StaffDTO): ResponseEntity<List<AttributesDTO>> {
+    fun getAttributes(@RequestBody staffDTO: StaffDTO): ResponseEntity<Set<AttributesDTO>> {
         return ResponseEntity(attributesService!!.getAttributes(staffDTO.id!!), HttpStatus.OK)
     }
 
     @PostMapping("/getAttributesCurrentStaff", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAttributesCurrentStaff(@RequestBody staffDTO: StaffDTO): ResponseEntity<List<AttributesDTO>> {
+    fun getAttributesCurrentStaff(@RequestBody staffDTO: StaffDTO): ResponseEntity<Set<AttributesDTO>> {
         return ResponseEntity(attributesService!!.getAttributesCurrentStaff(staffDTO.id!!), HttpStatus.OK)
     }
 
