@@ -68,7 +68,7 @@ class AttributeService {
                 groupName = attribute.group!!.name!!,
                 expression = expression,
                 type = type,
-                copy = attribute.copy!!,
+                link = attribute.link!!,
                 created = localCreated.toLocalDate().toString(),
                 students = getStudentsIdFromAttribute(attribute.dependency ?: attribute),
                 status = status,
@@ -86,7 +86,7 @@ class AttributeService {
             groupName = attribute.group!!.name!!,
             expression = attribute.expression,
             type = if (attribute.expression == null) "list" else "expression",
-            copy = attribute.copy!!,
+            link = attribute.link!!,
             created = attribute.created.toString(),
             studentsDTO = attribute.students!!.associateBy {
                 StudentsDTO(
@@ -110,7 +110,7 @@ class AttributeService {
             name = newAttributeDTO.name,
             expression = if (newAttributeDTO.expression == "") null else newAttributeDTO.expression,
             group = groupAttributeModel,
-            copy = false,
+            link = false,
             students = students
         )
         println("created: $newAttributeDTO")
@@ -164,7 +164,7 @@ class AttributeService {
             group = group,
             name = attributeName,
             expression = attribute.expression,
-            copy = true
+            link = true
         )
         attributeRepository!!.save(newAttribute)
     }
@@ -191,7 +191,7 @@ class AttributeService {
                 group = group,
                 name = attributeName,
                 expression = expression,
-                copy = attr.copy,
+                link = attr.link,
                 students = students
             )
             attributeRepository!!.save(newAttribute)
