@@ -217,7 +217,7 @@ class FilterService {
         val students = mutableSetOf<StudentModel>()
         filter.students!!.forEach { students.add(it) }
         if (filter.expression != null) {
-            val (group, attributeName) = attributeService!!.selectGroupAndAttributeByFilter(filter)
+            val (group, attributeName) = attributeService!!.selectGroupAndAttributeByFilter(filter, consumer)
             val attribute = AttributeModel(
                 staff = consumer,
                 group = group,

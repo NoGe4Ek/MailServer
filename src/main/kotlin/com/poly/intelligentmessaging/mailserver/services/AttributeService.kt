@@ -222,11 +222,11 @@ class AttributeService {
     }
 
     fun selectGroupAndAttributeByFilter(
-        filter: FilterModel
+        filter: FilterModel,
+        consumer: StaffModel
     ): Pair<GroupAttributesModel?, String> {
         val producerGroupName = filter.name!!
         val attributeName = filter.name!!
-        val consumer = filter.staff!!
         return selectGroupAndAttributeNames(consumer, attributeName, producerGroupName)
     }
 
