@@ -5,10 +5,7 @@ import com.poly.intelligentmessaging.mailserver.components.EmailBox
 import com.poly.intelligentmessaging.mailserver.domain.EmailData
 import com.poly.intelligentmessaging.mailserver.domain.dto.*
 import com.poly.intelligentmessaging.mailserver.domain.models.*
-import com.poly.intelligentmessaging.mailserver.repositories.EmailRepository
-import com.poly.intelligentmessaging.mailserver.repositories.FilterRepository
-import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
-import com.poly.intelligentmessaging.mailserver.repositories.StudentRepository
+import com.poly.intelligentmessaging.mailserver.repositories.*
 import com.poly.intelligentmessaging.mailserver.util.BASIC_ID_STAFF
 import com.poly.intelligentmessaging.mailserver.util.EmailAuthenticator
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,41 +39,43 @@ class FilterService {
     @Autowired
     private val notificationService: NotificationService? = null
 
-    fun getFilters(idStaff: String, isShort: Boolean): List<FiltersDTO> {
-        val listFiltersDTO = mutableMapOf<String, FiltersDTO>()
-        val listFilterProjection = filterRepository!!.getFilters(idStaff)
-        for (filter in listFilterProjection) {
-            val filterId = filter.getId()
-            if (listFiltersDTO.containsKey(filterId)) {
-                listFiltersDTO[filterId]!!.students.add(filter.getIdStudent())
-            } else {
-                val filterName = filter.getFilterName()
-                val mail = filter.getEmail()
-                val expression = filter.getExpression()
-                val type = if (expression == null) "list" else "expression"
-                val status = if (type == "expression") {
-                    val createdLocalDateTime = Timestamp.valueOf(filter.getCreated()).toLocalDateTime()
-                    dslHandler!!.getStatus(createdLocalDateTime, expression!!, idStaff)
-                } else "success"
-                val mode = filter.getMode()
-                val created = filter.getCreated().split(" ")[0]
-                val mailCounter = if (mode == "manual" && !isShort) getNumberOfMails(filterId) else null
-                val filtersDTO = FiltersDTO(
-                    filterId,
-                    filterName,
-                    mail,
-                    expression,
-                    type,
-                    mode,
-                    created,
-                    mailCounter,
-                    status = status
-                )
-                filtersDTO.students.add(filter.getIdStudent())
-                listFiltersDTO[filterId] = filtersDTO
-            }
+    @Autowired
+    private val attributeService: AttributeService? = null
+
+    @Autowired
+    private val attributeRepository: AttributeRepository? = null
+
+    fun getFilters(idStaff: String, isShort: Boolean): MutableSet<FiltersDTO> {
+        val resultSample = mutableSetOf<FiltersDTO>()
+        val filters = filterRepository!!.findAllByStaffId(UUID.fromString(idStaff))
+        for (filter in filters) {
+            val expression = filter.expression
+            val type = if (expression == null) "list" else "expression"
+            val localCreated = if (filter.dependency != null) filter.dependency.created!! else filter.created!!
+            val status = if (type == "expression" && filter.dependency == null) {
+                val createdLocalDateTime = Timestamp.valueOf(localCreated).toLocalDateTime()
+                dslHandler!!.getStatus(createdLocalDateTime, expression!!, filter.staff!!.id.toString())
+            } else "success"
+            val filtersDTO = FiltersDTO(
+                id = filter.id.toString(),
+                filterName = filter.name!!,
+                mail = filter.emailSend!!.email!!,
+                expression = expression,
+                type = type,
+                mode = filter.mode!!,
+                created = filter.created!!.toLocalDate().toString(),
+                link = filter.link!!,
+                mailCounter = if (filter.mode == "manual" && !isShort) getNumberOfMails(filter.id.toString()) else null,
+                students = getStudentsIdFromFilter(filter.dependency ?: filter),
+                status = status
+            )
+            resultSample.add(filtersDTO)
         }
-        return listFiltersDTO.values.toList()
+        return resultSample
+    }
+
+    private fun getStudentsIdFromFilter(filter: FilterModel): Set<String> {
+        return filter.students!!.associateBy { it.id.toString() }.keys.toSet()
     }
 
     fun getFilterById(filterIdDTO: FilterIdDTO): FiltersDTO {
@@ -89,6 +88,7 @@ class FilterService {
             mode = filter.mode!!,
             expression = filter.expression,
             created = "",
+            link = filter.link!!,
             studentsDTO = filter.students!!.associateBy {
                 StudentsDTO(
                     it.id.toString(),
@@ -127,6 +127,7 @@ class FilterService {
             expression = if (newFilterDTO.expression == "") null else newFilterDTO.expression,
             mode = newFilterDTO.mailOption,
             autoForward = newFilterDTO.mailOption == "auto",
+            link = false,
             students = students
         )
         filterRepository!!.save(filter)
@@ -181,11 +182,79 @@ class FilterService {
     }
 
     private fun linkFilter(notification: NotificationModel) {
-        TODO()
+        val consumer = notification.consumer!!
+        val filter = notification.filter!!
+        val filterName = selectFilterName(filter, consumer)
+        val (send, answer) = generateMailData(consumer, filterName)
+        val emailSend = EmailModel(
+            email = send.email,
+            password = send.password,
+            mailDirectory = send.mailDirectory,
+        )
+        val emailAnswer = EmailModel(
+            email = answer.email,
+            password = answer.password,
+            mailDirectory = answer.mailDirectory,
+        )
+        val newFilter = FilterModel(
+            staff = consumer,
+            dependency = filter,
+            emailSend = emailRepository!!.save(emailSend),
+            emailAnswer = emailRepository.save(emailAnswer),
+            name = filterName,
+            mode = filter.mode,
+            autoForward = filter.autoForward,
+            expression = filter.expression,
+            link = true
+        )
+        filterRepository!!.save(newFilter)
     }
 
     private fun copyFilter(notification: NotificationModel) {
-        TODO()
+        val filter = notification.filter!!
+        val consumer = notification.consumer!!
+        var newExpression: String? = null
+        val students = mutableSetOf<StudentModel>()
+        filter.students!!.forEach { students.add(it) }
+        if (filter.expression != null) {
+            val (group, attributeName) = attributeService!!.selectGroupAndAttributeByFilter(filter)
+            val attribute = AttributeModel(
+                staff = consumer,
+                group = group,
+                name = attributeName,
+                expression = filter.expression,
+                students = students,
+                link = false,
+                created = LocalDateTime.now()
+            )
+            attributeService.cascadeCopyAttribute(attribute, notification.consumer, notification.producer!!)
+            val groupName = group!!.name!!.replace(" ", "_")
+            newExpression = "$groupName[${attributeName.replace(" ", "_")}]".lowercase()
+        }
+        val filterName = selectFilterName(filter, consumer)
+        val (send, answer) = generateMailData(consumer, filterName)
+        val emailSend = EmailModel(
+            email = send.email,
+            password = send.password,
+            mailDirectory = send.mailDirectory,
+        )
+        val emailAnswer = EmailModel(
+            email = answer.email,
+            password = answer.password,
+            mailDirectory = answer.mailDirectory,
+        )
+        val newFilter = FilterModel(
+            staff = consumer,
+            emailSend = emailRepository!!.save(emailSend),
+            emailAnswer = emailRepository.save(emailAnswer),
+            name = filterName,
+            mode = filter.mode,
+            autoForward = filter.autoForward,
+            expression = newExpression,
+            link = false,
+            students = students
+        )
+        filterRepository!!.save(newFilter)
     }
 
     fun calculateExpression(expressionDTO: ExpressionDTO): ComputedExpressionDTO {
@@ -206,5 +275,21 @@ class FilterService {
         val emailAnswer = filterModel.emailAnswer!!
         val emailAuth = EmailAuthenticator(emailAnswer.email!!, emailAnswer.password!!)
         return emailBox!!.getNumberOfMails(emailAuth)
+    }
+
+    private fun selectFilterName(filter: FilterModel, consumer: StaffModel): String {
+        var filterName = filter.name!!
+        if (consumer.filters != null && consumer.filters.isNotEmpty()) {
+            val (name, counter) = checkAttributeName(0, filterName, consumer.filters)
+            filterName = if (counter == 0) name else "$name$counter"
+        }
+        return filterName
+    }
+
+    private fun checkAttributeName(counter: Int, name: String, filters: Set<FilterModel>): Pair<String, Int> {
+        val newName = if (counter == 0) name else "$name$counter"
+        val containsName = filters.find { it.name!!.lowercase() == newName.lowercase() } != null
+        return if (!containsName) name to counter
+        else checkAttributeName(counter + 1, name, filters)
     }
 }

@@ -29,4 +29,6 @@ interface FilterRepository : JpaRepository<FilterModel, UUID> {
         nativeQuery = true
     )
     fun getFilters(idStaff: String): MutableList<FilterProjection>
+
+    fun findAllByStaffId(staffId: UUID): Set<FilterModel>
 }

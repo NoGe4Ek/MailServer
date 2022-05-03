@@ -157,7 +157,7 @@ class AttributeService {
     fun linkAttribute(notification: NotificationModel) {
         val consumer = notification.consumer!!
         val attribute = notification.attribute!!
-        val (group, attributeName) = selectGroupAndAttributeNames(attribute, consumer)
+        val (group, attributeName) = selectGroupAndAttributeByAttribute(attribute, consumer)
         val newAttribute = AttributeModel(
             staff = consumer,
             dependency = attribute,
@@ -170,13 +170,15 @@ class AttributeService {
     }
 
     private fun copyAttribute(notification: NotificationModel) {
-        val attribute = notification.attribute!!
-        val cascadeAttributes = cascadeOpeningExpression(setOf(attribute)).sortedBy { it.created }
+        cascadeCopyAttribute(notification.attribute!!, notification.consumer!!, notification.producer!!)
+    }
+
+    fun cascadeCopyAttribute(attribute: AttributeModel, consumer: StaffModel, producer: StaffModel) {
+        val cascadeAttributes = cascadeOpeningExpression(setOf(attribute), producer).sortedBy { it.created }
         val oldAndNewGroupNames = mutableMapOf<String, String>()
         val oldAndNewAttrNames = mutableMapOf<String, String>()
         for (attr in cascadeAttributes) {
-            val consumer = notification.consumer!!
-            val (group, attributeName) = selectGroupAndAttributeNames(attr, consumer)
+            val (group, attributeName) = selectGroupAndAttributeByAttribute(attr, consumer)
             oldAndNewGroupNames[attr.group!!.name!!] = group!!.name!!
             oldAndNewAttrNames[attr.name!!] = attributeName
             var expression = attr.expression
@@ -198,33 +200,51 @@ class AttributeService {
         }
     }
 
-    fun cascadeOpeningExpression(attributes: Set<AttributeModel>): Set<AttributeModel> {
+    fun cascadeOpeningExpression(attributes: Set<AttributeModel>, producer: StaffModel): Set<AttributeModel> {
         val attrs = attributes.toMutableSet()
         for (attribute in attributes) {
             val expression = attribute.expression
             if (expression != null) {
-                val producer = attribute.staff!!
                 val attrFromExpr = dslHandler!!.getAttributeModelsFromExpression(expression, producer)
-                attrs.addAll(cascadeOpeningExpression(attrFromExpr))
+                attrs.addAll(cascadeOpeningExpression(attrFromExpr, producer))
             }
         }
         return attrs.toSet()
     }
 
-    private fun selectGroupAndAttributeNames(
+    private fun selectGroupAndAttributeByAttribute(
         attribute: AttributeModel,
         consumer: StaffModel
     ): Pair<GroupAttributesModel?, String> {
         val producerGroupName = attribute.group!!.name!!
-        var attributeName = attribute.name!!
-        var group = consumer.groups!!.find { it.name!!.lowercase() == producerGroupName.lowercase() }
+        val attributeName = attribute.name!!
+        return selectGroupAndAttributeNames(consumer, attributeName, producerGroupName)
+    }
+
+    fun selectGroupAndAttributeByFilter(
+        filter: FilterModel
+    ): Pair<GroupAttributesModel?, String> {
+        val producerGroupName = filter.name!!
+        val attributeName = filter.name!!
+        val consumer = filter.staff!!
+        return selectGroupAndAttributeNames(consumer, attributeName, producerGroupName)
+    }
+
+    private fun selectGroupAndAttributeNames(
+        consumer: StaffModel,
+        attrName: String,
+        grName: String
+    ): Pair<GroupAttributesModel, String> {
+        var attributeName = attrName
+        val groups = groupAttributesRepository!!.findAllByStaff(consumer)
+        var group = groups.find { it.name!!.lowercase() == grName.lowercase() }
         if (group == null) {
-            group = groupAttributesRepository!!.save(GroupAttributesModel(staff = consumer, name = producerGroupName))
+            group = groupAttributesRepository.save(GroupAttributesModel(staff = consumer, name = grName))
         } else if (group.attributes != null && group.attributes!!.isNotEmpty()) {
             val (name, counter) = checkAttributeName(0, attributeName, group.attributes!!)
             attributeName = if (counter == 0) name else "$name$counter"
         }
-        return group to attributeName
+        return group!! to attributeName
     }
 
     private fun checkAttributeName(counter: Int, name: String, attributes: Set<AttributeModel>): Pair<String, Int> {

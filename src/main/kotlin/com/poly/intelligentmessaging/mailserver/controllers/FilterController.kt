@@ -19,12 +19,12 @@ class FilterController {
     val filterService: FilterService? = null
 
     @PostMapping("/getFilters", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getFilters(@RequestBody staffDTO: StaffDTO): ResponseEntity<List<FiltersDTO>> {
+    fun getFilters(@RequestBody staffDTO: StaffDTO): ResponseEntity<Set<FiltersDTO>> {
         return ResponseEntity(filterService!!.getFilters(staffDTO.id!!, false), HttpStatus.OK)
     }
 
     @PostMapping("/getFiltersShort")
-    fun getFiltersShort(@RequestBody staffDTO: StaffDTO): ResponseEntity<List<FiltersDTO>> {
+    fun getFiltersShort(@RequestBody staffDTO: StaffDTO): ResponseEntity<Set<FiltersDTO>> {
         return ResponseEntity(filterService!!.getFilters(staffDTO.id!!, true), HttpStatus.OK)
     }
 

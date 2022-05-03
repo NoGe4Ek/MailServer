@@ -174,13 +174,13 @@ class DSLHandler {
 
     private fun calculateExpression(
         expression: String,
-        groupAttributes: Set<GroupAttributesModel>
+        groupAttributes: Set<GroupAttributesModel>,
     ): Pair<String, Set<StudentModel>> {
         return try {
             val expressionWithoutSpace = expression.replace(Regex("""\s+"""), "")
             validationExpression(expressionWithoutSpace, groupAttributes)
             val rpn = toRPN(expressionWithoutSpace)
-            val result = calculateRPN(rpn)
+            val result = calculateRPN(rpn, groupAttributes)
             val status = if (result.isEmpty()) "warning" else "success"
             status to result
         } catch (e: ValidationException) {
@@ -188,13 +188,13 @@ class DSLHandler {
         }
     }
 
-    private fun calculateRPN(rpn: List<String>): Set<StudentModel> {
+    private fun calculateRPN(rpn: List<String>, groupAttributes: Set<GroupAttributesModel>): Set<StudentModel> {
         val stack = Stack<Set<StudentModel>>()
         val students = studentRepository!!.findAll().toSet()
         for (token in rpn) {
             if (token.length > 1) {
                 if (token == "ALL") stack.push(students)
-                else stack.push(getSampleStudentsByFunction(token, students))
+                else stack.push(getSampleStudentsByFunction(token, groupAttributes))
             } else when (token) {
                 "&" -> stack.push(stack.pop().intersect(stack.pop()))
                 "|" -> stack.push(stack.pop() + stack.pop())
@@ -237,14 +237,14 @@ class DSLHandler {
         return token to position
     }
 
-    private fun getSampleStudentsByFunction(token: String, students: Set<StudentModel>): Set<StudentModel> {
-        val (group, args) = getGroupAndAttr(token)
-        return students.filter {
-            val needsAttribute = it.attributes!!.find { attribute ->
-                attribute.name!!.lowercase() == args && attribute.group!!.name!!.lowercase() == group
-            }
-            needsAttribute != null
-        }.toSet()
+    private fun getSampleStudentsByFunction(
+        token: String,
+        groups: Set<GroupAttributesModel>,
+    ): Set<StudentModel> {
+        val (groupName, args) = getGroupAndAttr(token)
+        val group = groups.find { it.name!!.lowercase() == groupName }
+        val attribute = group!!.attributes!!.find { it.name!!.lowercase() == args }
+        return if (attribute!!.dependency != null) attribute.dependency!!.students!! else attribute.students!!
     }
 
     private fun validationFunction(token: String, groupAttributes: Set<GroupAttributesModel>): Boolean {

@@ -19,6 +19,10 @@ data class FilterModel(
     @JoinColumn(name = "id_staff", nullable = false)
     val staff: StaffModel? = null,
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
+    @JoinColumn(name = "id_dependency", nullable = true)
+    val dependency: FilterModel? = null,
+
     @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
     @JoinColumn(name = "id_email_send")
     val emailSend: EmailModel? = null,
@@ -56,6 +60,14 @@ data class FilterModel(
         inverseJoinColumns = [JoinColumn(name = "id_student", referencedColumnName = "id")]
     )
     var students: Set<StudentModel>? = null,
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
+    @JoinColumn(name = "id_dependency")
+    var dependencies: Set<AttributeModel>? = null,
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+    @JoinColumn(name = "id_filter")
+    var notifications: Set<NotificationModel>? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

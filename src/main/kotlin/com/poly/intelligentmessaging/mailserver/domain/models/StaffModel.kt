@@ -34,7 +34,7 @@ data class StaffModel(
     @JoinColumn(name = "id_staff")
     val attributes: Set<AttributeModel>? = null,
 
-    @OneToMany(fetch = FetchType.EAGER) //TODO?
+    @OneToMany(fetch = FetchType.LAZY) //TODO?
     @JoinColumn(name = "id_staff")
     val groups: Set<GroupAttributesModel>? = null,
 

@@ -48,6 +48,14 @@ data class AttributeModel(
         inverseJoinColumns = [JoinColumn(name = "id_student", referencedColumnName = "id")]
     )
     var students: Set<StudentModel>? = null,
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+    @JoinColumn(name = "id_dependency")
+    var dependencies: Set<AttributeModel>? = null,
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+    @JoinColumn(name = "id_attribute")
+    var notifications: Set<NotificationModel>? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
