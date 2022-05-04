@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/admin")
@@ -40,5 +41,10 @@ class AdminController {
     @GetMapping("/getRoles")
     fun getRoles(): ResponseEntity<Set<RoleDTO>> {
         return ResponseEntity(adminService!!.getRoles(), HttpStatus.OK)
+    }
+
+    @PostMapping("/update")
+    fun update(@RequestParam("file") file: MultipartFile): ResponseEntity<Map<String, String>> {
+        return ResponseEntity(adminService!!.updateDB(file), HttpStatus.OK)
     }
 }

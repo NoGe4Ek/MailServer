@@ -14,7 +14,7 @@ data class StudentModel(
     @Column(name = "id", updatable = false, nullable = false)
     val id: UUID? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
     @JoinColumn(name = "id_person", nullable = false)
     val person: PersonModel? = null,
 
@@ -22,7 +22,7 @@ data class StudentModel(
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
     @JoinTable(
         name = "student_to_attribute",
         joinColumns = [JoinColumn(name = "id_student", referencedColumnName = "id")],
@@ -30,7 +30,7 @@ data class StudentModel(
     )
     val attributes: Set<AttributeModel>? = null,
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.DETACH])
     @JoinTable(
         name = "student_to_filter",
         joinColumns = [JoinColumn(name = "id_student", referencedColumnName = "id")],

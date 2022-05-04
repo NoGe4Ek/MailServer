@@ -17,27 +17,12 @@ CREATE TABLE staff
     FOREIGN KEY (id_person) REFERENCES person (id)
 );
 
-CREATE TABLE possibility
-(
-    id      UUID PRIMARY KEY,
-    name    TEXT        NOT NULL,
-    created TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
 CREATE TABLE role
 (
     id      UUID PRIMARY KEY,
     name    TEXT        NOT NULL,
     level   INTEGER     NOT NULL,
     created TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE TABLE role_to_possibility
-(
-    id_role        UUID NOT NULL,
-    id_possibility UUID NOT NULL,
-    FOREIGN KEY (id_role) REFERENCES role (id),
-    FOREIGN KEY (id_possibility) REFERENCES possibility (id)
 );
 
 CREATE TABLE role_to_staff
@@ -151,3 +136,29 @@ CREATE TABLE notification
     FOREIGN KEY (id_filter) REFERENCES filter (id),
     FOREIGN KEY (id_attribute) REFERENCES attribute (id)
 );
+
+-- INIT DATA
+INSERT INTO person
+VALUES ('887f38df-9e1f-407f-b82d-c28ceddc92ed', 'ALL', 'ALL', 'ALL', 'basicadmin@poly-sender.ru');
+
+INSERT INTO staff
+VALUES ('ad7a8951-2f95-4619-802b-1285c3279623', '887f38df-9e1f-407f-b82d-c28ceddc92ed',
+        '$2a$10$8xworZ7s4H1HIWV/ubIkKuvtiALobURe7onFm36oLPz51J1KEvAjS');
+
+INSERT INTO email
+VALUES ('b3b6a8f5-9fea-4f15-8fca-5519bd52a737',
+        'noreply@poly-sender.ru',
+        'fon?gfMKUC%d',
+        '/noreply');
+
+INSERT INTO role
+VALUES ('6f8bcb5f-5fc4-4805-8314-f36904ef1eda', 'USER', 1);
+
+INSERT INTO role
+VALUES ('c55781a7-a000-4595-9b72-7affe99f3e26', 'ADMIN', 2);
+
+-- INSERT INTO role_to_staff
+-- VALUES ('6f8bcb5f-5fc4-4805-8314-f36904ef1eda', 'ad7a8951-2f95-4619-802b-1285c3279623');
+
+INSERT INTO role_to_staff
+VALUES ('c55781a7-a000-4595-9b72-7affe99f3e26', 'ad7a8951-2f95-4619-802b-1285c3279623');

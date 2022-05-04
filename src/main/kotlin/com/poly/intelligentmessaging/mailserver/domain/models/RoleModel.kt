@@ -29,14 +29,6 @@ data class RoleModel(
 
     @ManyToMany
     @JoinTable(
-        name = "role_to_possibility",
-        joinColumns = [JoinColumn(name = "id_role", referencedColumnName = "id")],
-        inverseJoinColumns = [JoinColumn(name = "id_possibility", referencedColumnName = "id")]
-    )
-    val possibilities: Set<PossibilityModel>? = null,
-
-    @ManyToMany
-    @JoinTable(
         name = "role_to_staff",
         joinColumns = [JoinColumn(name = "id_role", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")]

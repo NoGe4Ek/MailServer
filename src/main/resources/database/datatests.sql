@@ -1,7 +1,4 @@
 INSERT INTO person
-VALUES ('887f38df-9e1f-407f-b82d-c28ceddc92ed', 'ALL', 'ALL', 'ALL', 'private@poly-sender.ru');
-
-INSERT INTO person
 VALUES ('fde5395e-766f-492e-b6c6-cca981026769', 'Staff1', 'Staff1', 'Staff1', 'getrhymes@gmail.com');
 
 INSERT INTO person
@@ -15,10 +12,6 @@ VALUES ('ce00ac40-791c-48ad-abf1-b0be560043a2', 'Student2', 'Student2', 'Student
 
 INSERT INTO person
 VALUES ('3a00ac40-791c-48ad-abf1-b0be560043a2', 'Student3', 'Student3', 'Student3', 'tarasenko.es@edu.spbstu.ru');
-
-INSERT INTO staff
-VALUES ('ad7a8951-2f95-4619-802b-1285c3279623', '887f38df-9e1f-407f-b82d-c28ceddc92ed',
-        '$2a$10$nMjsQwEgw52arQ4woz9UAO8.0w3v6haQhbAe3xaphdE6mU.J8E.qy');
 
 INSERT INTO staff
 VALUES ('9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b', 'fde5395e-766f-492e-b6c6-cca981026769',
@@ -109,25 +102,6 @@ INSERT INTO student_to_attribute
 VALUES ('41066575-4361-452a-b2f7-908831aeb240', 'd159c111-18cd-4413-a69c-2dc67b2bb7be');
 INSERT INTO student_to_attribute
 VALUES ('41066575-4361-452a-b2f7-908831aeb240', 'da45efeb-ac57-447b-b062-4c500d2675fa');
-
-
-INSERT INTO email
-VALUES ('b3b6a8f5-9fea-4f15-8fca-5519bd52a737',
-        'noreply@poly-sender.ru',
-        'fon?gfMKUC%d',
-        '/noreply');
-
-INSERT INTO role
-VALUES ('6f8bcb5f-5fc4-4805-8314-f36904ef1eda', 'USER', 1);
-
-INSERT INTO role
-VALUES ('c55781a7-a000-4595-9b72-7affe99f3e26', 'ADMIN', 2);
-
-INSERT INTO role_to_staff
-VALUES ('6f8bcb5f-5fc4-4805-8314-f36904ef1eda', 'ad7a8951-2f95-4619-802b-1285c3279623');
-
-INSERT INTO role_to_staff
-VALUES ('c55781a7-a000-4595-9b72-7affe99f3e26', 'ad7a8951-2f95-4619-802b-1285c3279623');
 
 INSERT INTO role_to_staff
 VALUES ('6f8bcb5f-5fc4-4805-8314-f36904ef1eda', '9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b');
