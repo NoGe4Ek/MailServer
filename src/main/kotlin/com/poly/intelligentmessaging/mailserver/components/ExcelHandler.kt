@@ -22,9 +22,8 @@ class ExcelHandler {
 
         val students = mutableSetOf<StudentExcel>()
         val groupAttributes = getGroupsAttributeFromFirstRow(sheet.first())
-        for (rowIndex in 1 until sheet.lastRowNum) {
-            val row = sheet.getRow(rowIndex)
-            if (row.getCell(5) == null) continue
+        for (row in sheet) {
+            if (row == sheet.first() || row.getCell(5) == null) continue
             val email = row.getCell(5).stringCellValue
             val studentExcel = StudentExcel(
                 lastName = if (row.getCell(0) != null) row.getCell(0).stringCellValue else "",

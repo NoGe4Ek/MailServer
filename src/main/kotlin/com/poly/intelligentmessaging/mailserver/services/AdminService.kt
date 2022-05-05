@@ -129,8 +129,9 @@ class AdminService {
     }
 
     private fun updateDataBase(attributes: Set<AttributeModel>, students: MutableSet<StudentExcel>) {
-        val studentModels = studentRepository!!.findAll()
+        val validStudents = mutableSetOf<StudentModel>()
         for (attribute in attributes) {
+            val studentModels = studentRepository!!.findAll()
             val filteredStudents = students.filter {
                 it.attributes[attribute.group!!.name] != null && it.attributes[attribute.group!!.name] == attribute.name
             }
@@ -155,11 +156,12 @@ class AdminService {
                 } else studentModels.remove(studentModel)
                 studentsForAttribute.add(studentModel!!)
             }
+            validStudents.addAll(studentsForAttribute)
             attribute.students = studentsForAttribute
             attribute.created = LocalDateTime.now()
             attributeRepository!!.save(attribute)
         }
-        studentRepository.deleteAll(studentModels)
+        studentRepository!!.deleteAll(studentRepository.findAll() - validStudents)
     }
 
     private fun createDataBase(groups: Map<String, Set<String>>, students: Set<StudentExcel>) {
