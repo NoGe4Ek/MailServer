@@ -25,8 +25,7 @@ data class GroupAttributesModel(
     @Column(name = "created")
     val created: LocalDateTime? = null,
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.REMOVE])
-    @JoinColumn(name = "id_group_attribute")
+    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.REMOVE], mappedBy = "group", orphanRemoval = true)
     val attributes: Set<AttributeModel>? = null,
 ) {
     override fun equals(other: Any?): Boolean {

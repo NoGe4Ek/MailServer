@@ -12,7 +12,7 @@ import java.util.*
 @Repository
 interface GroupAttributesRepository : JpaRepository<GroupAttributesModel, UUID> {
 
-    fun findByNameAndStaffId(name: String, idStaff: UUID): GroupAttributesModel
+    fun findByNameAndStaffId(name: String, idStaff: UUID): GroupAttributesModel?
 
     fun findAllByStaffIdOrStaffId(currentStaff: UUID, basicStaff: UUID): Set<GroupAttributesModel>
 

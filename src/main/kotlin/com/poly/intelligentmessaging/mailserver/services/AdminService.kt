@@ -121,55 +121,28 @@ class AdminService {
     }
 
     fun updateDB(file: MultipartFile): Map<String, String> {
-        val (students, groups) = excelHandler!!.parseExcel(file)
-        val attributes = attributeRepository!!.findAllByStaffId(UUID.fromString(BASIC_ID_STAFF))
-        if (attributes.isEmpty()) createDataBase(groups, students)
-        else updateDataBase(attributes, students)
-        return mapOf("status" to "success")
-    }
-
-    private fun updateDataBase(attributes: Set<AttributeModel>, students: MutableSet<StudentExcel>) {
-        val validStudents = mutableSetOf<StudentModel>()
-        for (attribute in attributes) {
-            val studentModels = studentRepository!!.findAll()
-            val filteredStudents = students.filter {
-                it.attributes[attribute.group!!.name] != null && it.attributes[attribute.group!!.name] == attribute.name
-            }
-            if (filteredStudents.isEmpty()) {
-                if (attribute.group!!.attributes!!.size == 1) groupAttributesRepository!!.delete(attribute.group!!)
-                else attributeRepository!!.delete(attribute)
-                continue
-            }
-            val studentsForAttribute = mutableSetOf<StudentModel>()
-            for (student in filteredStudents) {
-                var studentModel = studentModels.find { it.person!!.email == student.email }
-                if (studentModel == null) {
-                    val person = personRepository!!.save(
-                        PersonModel(
-                            lastName = student.lastName,
-                            firstName = student.firstName,
-                            patronymic = student.patronymic,
-                            email = student.email,
-                        )
-                    )
-                    studentModel = studentRepository.save(StudentModel(person = person))
-                } else studentModels.remove(studentModel)
-                studentsForAttribute.add(studentModel!!)
-            }
-            validStudents.addAll(studentsForAttribute)
-            attribute.students = studentsForAttribute
-            attribute.created = LocalDateTime.now()
-            attributeRepository!!.save(attribute)
+        return try {
+            val (students, groups) = excelHandler!!.parseExcel(file)
+            updateDataBase(groups, students)
+            mapOf("status" to "success")
+        } catch (e: Exception) {
+            mapOf("status" to "error")
         }
-        studentRepository!!.deleteAll(studentRepository.findAll() - validStudents)
     }
 
-    private fun createDataBase(groups: Map<String, Set<String>>, students: Set<StudentExcel>) {
+    private fun updateDataBase(groups: Map<String, Set<String>>, students: Set<StudentExcel>) {
         val staff = staffRepository!!.findById(UUID.fromString(BASIC_ID_STAFF)).get()
+        val validAttributes = mutableSetOf<AttributeModel>()
+        val validStudents = mutableSetOf<StudentModel>()
+        val validGroup = mutableSetOf<GroupAttributesModel>()
         for (group in groups) {
-            val newGroup = groupAttributesRepository!!.save(GroupAttributesModel(staff = staff, name = group.key))
+            var newGroup: GroupAttributesModel? =
+                groupAttributesRepository!!.findByNameAndStaffId(group.key, UUID.fromString(BASIC_ID_STAFF))
+            if (newGroup == null) {
+                newGroup = groupAttributesRepository.save(GroupAttributesModel(staff = staff, name = group.key))
+            }
             for (attribute in group.value) {
-                val studentsForAttribute = mutableSetOf<StudentModel>()
+                val studentAttributes = mutableSetOf<StudentModel>()
                 val studentModels = studentRepository!!.findAll()
                 val filteredStudents = students.filter {
                     it.attributes[group.key] != null && it.attributes[group.key] == attribute
@@ -177,7 +150,7 @@ class AdminService {
                 for (student in filteredStudents) {
                     val finder = studentModels.find { it.person!!.email == student.email }
                     if (finder != null) {
-                        studentsForAttribute.add(finder)
+                        studentAttributes.add(finder)
                         continue
                     }
                     val person = personRepository!!.save(
@@ -189,19 +162,31 @@ class AdminService {
                         )
                     )
                     val newStudent = studentRepository.save(StudentModel(person = person))
-                    studentsForAttribute.add(newStudent)
+                    studentAttributes.add(newStudent)
                 }
-                val newAttribute = AttributeModel(
-                    staff = staff,
-                    dependency = null,
-                    group = newGroup,
-                    name = attribute,
-                    expression = null,
-                    link = false,
-                    students = studentsForAttribute
-                )
-                attributeRepository!!.save(newAttribute)
+                var newAttribute = attributeRepository!!.findByNameAndGroup(attribute, newGroup!!)
+                if (newAttribute == null) {
+                    newAttribute = AttributeModel(
+                        staff = staff,
+                        dependency = null,
+                        group = newGroup,
+                        name = attribute,
+                        expression = null,
+                        link = false,
+                    )
+                }
+                newAttribute.students = studentAttributes
+                newAttribute.created = LocalDateTime.now()
+                validAttributes.add(attributeRepository.save(newAttribute))
+                validStudents.addAll(studentAttributes)
+                validGroup.add(newGroup)
             }
         }
+        val allBasic = attributeRepository!!.findAllByStaffId(UUID.fromString(BASIC_ID_STAFF))
+        attributeRepository.deleteAll(allBasic - validAttributes)
+        val allStudents = studentRepository!!.findAll()
+        studentRepository.deleteAll(allStudents - validStudents)
+        val allGroups = groupAttributesRepository!!.findAllByStaffId(UUID.fromString(BASIC_ID_STAFF))
+        groupAttributesRepository.deleteAll(allGroups - validGroup)
     }
 }

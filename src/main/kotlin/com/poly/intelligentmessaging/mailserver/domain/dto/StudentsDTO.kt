@@ -4,5 +4,5 @@ data class StudentsDTO(
     val id: String,
     val name: String,
     val email: String,
-    val attributes: MutableMap<String, MutableList<String>> = mutableMapOf()
+    val attributes: Map<String, Set<String>> = mutableMapOf()
 )
