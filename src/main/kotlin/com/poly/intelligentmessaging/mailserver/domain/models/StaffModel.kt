@@ -15,7 +15,7 @@ data class StaffModel(
     @Column(name = "id", updatable = false, nullable = false)
     val id: UUID? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
     @JoinColumn(name = "id_person", nullable = false)
     val person: PersonModel? = null,
 
@@ -26,19 +26,18 @@ data class StaffModel(
     @Column(name = "created")
     var created: LocalDateTime? = null,
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_staff")
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "staff", orphanRemoval = true)
     val filters: Set<FilterModel>? = null,
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_staff")
+    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.REMOVE], mappedBy = "staff", orphanRemoval = true)
+//    @JoinColumn(name = "id_staff")
     val attributes: Set<AttributeModel>? = null,
 
-    @OneToMany(fetch = FetchType.LAZY) //TODO?
-    @JoinColumn(name = "id_staff")
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "staff", orphanRemoval = true)
+//    @JoinColumn(name = "id_staff")
     val groups: Set<GroupAttributesModel>? = null,
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = [CascadeType.DETACH])
     @JoinTable(
         name = "role_to_staff",
         joinColumns = [JoinColumn(name = "id_staff", referencedColumnName = "id")],
