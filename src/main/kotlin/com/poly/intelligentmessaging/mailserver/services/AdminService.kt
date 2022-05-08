@@ -3,13 +3,12 @@ package com.poly.intelligentmessaging.mailserver.services
 import com.poly.intelligentmessaging.mailserver.components.EmailBox
 import com.poly.intelligentmessaging.mailserver.components.ExcelHandler
 import com.poly.intelligentmessaging.mailserver.domain.StudentExcel
-import com.poly.intelligentmessaging.mailserver.domain.dto.AccessDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.ResponseDTO
-import com.poly.intelligentmessaging.mailserver.domain.dto.RoleDTO
+import com.poly.intelligentmessaging.mailserver.domain.dto.*
 import com.poly.intelligentmessaging.mailserver.domain.models.*
 import com.poly.intelligentmessaging.mailserver.repositories.*
 import com.poly.intelligentmessaging.mailserver.util.BASIC_ID_STAFF
 import com.poly.intelligentmessaging.mailserver.util.generatePassword
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
@@ -19,6 +18,8 @@ import java.util.*
 
 @Service
 class AdminService {
+
+    private val logger = LoggerFactory.getLogger(AdminService::class.java)
 
     @Autowired
     private val roleRepository: RoleRepository? = null
@@ -188,5 +189,50 @@ class AdminService {
         studentRepository.deleteAll(allStudents - validStudents)
         val allGroups = groupAttributesRepository!!.findAllByStaffId(UUID.fromString(BASIC_ID_STAFF))
         groupAttributesRepository.deleteAll(allGroups - validGroup)
+    }
+
+    fun getUsers(): Set<UserDTO> {
+        val staffs = staffRepository!!.findAll()
+        val result = mutableSetOf<UserDTO>()
+        staffs.forEach { staff ->
+            val person = staff.person!!
+            if (person.email != "basicadmin@poly-sender.ru") {
+                val roles = staff.roles!!
+                val admin = roles.find { it.level!! == 2 } != null
+                val user = roles.find { it.level!! == 1 } != null
+                val userDTO = UserDTO(
+                    id = staff.id.toString(),
+                    lastName = person.lastName!!,
+                    firstName = person.firstName!!,
+                    patronymic = person.patronymic!!,
+                    admin = admin,
+                    user = user,
+                    date = staff.created!!.toLocalDate().toString()
+                )
+                result.add(userDTO)
+            }
+        }
+        return result
+    }
+
+    fun changeRoles(changeStaffDTO: ChangeStaffDTO): ChangeStaffDTO {
+        val staff = staffRepository!!.findById(UUID.fromString(changeStaffDTO.id)).get()
+        val roles = roleRepository!!.findAll()
+        val newRoles = mutableSetOf<RoleModel>()
+        staff.created = LocalDateTime.now()
+        for (role in changeStaffDTO.roles) {
+            newRoles.add(roles.find { it.name!! == role }!!)
+        }
+        staff.roles = newRoles
+        staffRepository.save(staff)
+        return changeStaffDTO
+    }
+
+    fun deleteUser(changeStaffDTO: ChangeStaffDTO): ChangeStaffDTO {
+        val staff = staffRepository!!.findById(UUID.fromString(changeStaffDTO.id)).get()
+        val login = staff.person!!.email!!
+        staffRepository.delete(staff)
+        logger.info("User: $login was removed")
+        return changeStaffDTO
     }
 }

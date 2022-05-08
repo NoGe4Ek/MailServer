@@ -24,7 +24,7 @@ data class StaffModel(
 
     @CreationTimestamp
     @Column(name = "created")
-    val created: LocalDateTime? = null,
+    var created: LocalDateTime? = null,
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_staff")
