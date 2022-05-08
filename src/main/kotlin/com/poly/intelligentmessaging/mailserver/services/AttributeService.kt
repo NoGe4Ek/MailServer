@@ -8,6 +8,7 @@ import com.poly.intelligentmessaging.mailserver.repositories.GroupAttributesRepo
 import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StudentRepository
 import com.poly.intelligentmessaging.mailserver.util.BASIC_ID_STAFF
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.sql.Timestamp
@@ -16,6 +17,8 @@ import java.util.*
 
 @Service
 class AttributeService {
+
+    private val logger = LoggerFactory.getLogger(AttributeService::class.java)
 
     @Autowired
     private val attributeRepository: AttributeRepository? = null
@@ -113,8 +116,8 @@ class AttributeService {
             link = false,
             students = students
         )
-        println("created: $newAttributeDTO")
-        attributeRepository!!.save(attributeModel)
+        val newAttr = attributeRepository!!.save(attributeModel)
+        logger.info("${staff.person!!.email} created attribute: ${newAttr.id}")
         return newAttributeDTO
     }
 

@@ -1,5 +1,6 @@
 package com.poly.intelligentmessaging.mailserver.configuration.jwt
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -10,6 +11,8 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class JwtTokenFilter : OncePerRequestFilter() {
+
+    private val logger = LoggerFactory.getLogger(JwtTokenFilter::class.java)
 
     @Autowired
     private val jwtTokenProvider: JwtTokenProvider? = null

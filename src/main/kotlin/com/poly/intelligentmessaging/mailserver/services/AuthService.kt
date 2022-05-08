@@ -10,6 +10,7 @@ import com.poly.intelligentmessaging.mailserver.repositories.AccessRepository
 import com.poly.intelligentmessaging.mailserver.repositories.StaffRepository
 import com.poly.intelligentmessaging.mailserver.util.generatePassword
 import io.jsonwebtoken.ExpiredJwtException
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class AuthService {
+
+    private val logger = LoggerFactory.getLogger(AuthService::class.java)
 
     @Autowired
     private val authenticationManager: AuthenticationManager? = null
@@ -50,6 +53,7 @@ class AuthService {
             val staff = staffRepository!!.getStaffByEmail(username)
             val person = staff!!.person!!
             val fullName = "${person.lastName} ${person.firstName} ${person.patronymic}"
+            logger.info("Username: $username, Id: ${staff.id} login success")
             return AuthResponseDTO(
                 status = true,
                 idStaff = staff.id.toString(),
@@ -59,10 +63,13 @@ class AuthService {
                 roles = staff.roles!!.associateBy { it.name!! }.keys
             )
         } catch (e: UsernameNotFoundException) {
+            logger.warn("Username: ${authRequestDTO.login} login error")
             return AuthResponseDTO(false)
         } catch (e: BadCredentialsException) {
+            logger.warn("Username: ${authRequestDTO.login} login error")
             return AuthResponseDTO(false)
         } catch (e: ExpiredJwtException) {
+            logger.warn("Username: ${authRequestDTO.login} login error")
             return AuthResponseDTO(false)
         }
     }
@@ -77,7 +84,9 @@ class AuthService {
         return authRequestDTO
     }
 
-    fun getAccess(newStaffDTO: NewStaffDTO): NewStaffDTO {
+    fun getAccess(newStaffDTO: NewStaffDTO): Map<String, String> {
+        val staff = staffRepository!!.findAll().find { it.person!!.email == newStaffDTO.email }
+        if (staff != null) return mapOf("status" to "error")
         val access = AccessModel(
             lastName = newStaffDTO.lastName,
             firstName = newStaffDTO.firstName,
@@ -87,6 +96,6 @@ class AuthService {
             highSchool = newStaffDTO.highSchool
         )
         accessRepository!!.save(access)
-        return newStaffDTO
+        return mapOf("status" to "success")
     }
 }

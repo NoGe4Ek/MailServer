@@ -32,7 +32,7 @@ class AuthController {
     }
 
     @PostMapping("/getAccess", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAccess(@RequestBody newStaffDTO: NewStaffDTO): ResponseEntity<NewStaffDTO> {
+    fun getAccess(@RequestBody newStaffDTO: NewStaffDTO): ResponseEntity<Map<String, String>> {
         return ResponseEntity(authService!!.getAccess(newStaffDTO), HttpStatus.OK)
     }
 }
