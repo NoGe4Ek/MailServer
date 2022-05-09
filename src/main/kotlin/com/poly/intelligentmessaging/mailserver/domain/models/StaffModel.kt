@@ -30,11 +30,9 @@ data class StaffModel(
     val filters: Set<FilterModel>? = null,
 
     @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.REMOVE], mappedBy = "staff", orphanRemoval = true)
-//    @JoinColumn(name = "id_staff")
     val attributes: Set<AttributeModel>? = null,
 
     @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "staff", orphanRemoval = true)
-//    @JoinColumn(name = "id_staff")
     val groups: Set<GroupAttributesModel>? = null,
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = [CascadeType.DETACH])

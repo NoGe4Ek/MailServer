@@ -1,8 +1,11 @@
 package com.poly.intelligentmessaging.mailserver.components
 
 import com.poly.intelligentmessaging.mailserver.domain.StudentExcel
+import com.poly.intelligentmessaging.mailserver.domain.models.StudentModel
 import org.apache.poi.ss.usermodel.CellType
+import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.VerticalAlignment
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
@@ -48,6 +51,41 @@ class ExcelHandler {
         }
         tempFile.delete()
         return students to groupAttributes
+    }
+
+    fun generateExcel(students: Set<StudentModel>, name: String): File {
+        val listStudents = students.toList()
+
+        val workbook = XSSFWorkbook()
+        val sheet = workbook.createSheet(name)
+
+        val headerCellStyle = workbook.createCellStyle()
+        headerCellStyle.alignment = HorizontalAlignment.CENTER
+        headerCellStyle.verticalAlignment = VerticalAlignment.CENTER
+        sheet.setColumnWidth(0, 10976)
+        sheet.setColumnWidth(1, 10976)
+
+
+        val firstRow = sheet.createRow(0)
+
+        firstRow.createCell(0).setCellValue("ФИО")
+        firstRow.createCell(1).setCellValue("Email")
+
+        firstRow.getCell(0).cellStyle = headerCellStyle
+        firstRow.getCell(1).cellStyle = headerCellStyle
+
+        for (i in listStudents.indices) {
+            val person = listStudents[i].person!!
+            val fullName = "${person.lastName} ${person.firstName} ${person.patronymic}"
+            val row = sheet.createRow(i + 1)
+            row.createCell(0).setCellValue(fullName)
+            row.createCell(1).setCellValue(person.email!!)
+        }
+        val fileOut = FileOutputStream(name)
+        workbook.write(fileOut)
+        fileOut.close()
+        workbook.close()
+        return File(name)
     }
 
     private fun getGroupsAttributeFromFirstRow(row: Row): MutableMap<String, MutableSet<String>> {
