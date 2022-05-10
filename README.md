@@ -1,7 +1,3 @@
-Send forward
-
-    curl -X POST -d "filter=59cbc294-c52d-43b1-831d-66b1a4d04047" -d "recipient=9aff7a2e-6b7a-4e14-b51a-dab7dc87e56b" 'http://localhost:8080/forward'
-
 https://www.tutorialspoint.com/javamail_api/javamail_api_overview.html
 https://vitalflux.com/integrate-mailgun-spring-boot-java-app/
 https://habr.com/ru/post/526162/
@@ -18,11 +14,5 @@ users /etc/dovecot/users
 https://www.8host.com/blog/nastrojka-pochtovogo-servera-postfixdovecot/
 
 https://medium.com/@kshep92/single-page-applications-with-spring-boot-b64d8d37015d
-
-!!!
-
-2. сделать страницу управления пользователями
-   !!
-3. генерация списков
 
 

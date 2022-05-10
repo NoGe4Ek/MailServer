@@ -5,6 +5,7 @@ data class UserDTO(
     val lastName: String,
     val firstName: String,
     val patronymic: String,
+    val email: String,
     val admin: Boolean,
     val user: Boolean,
     val date: String,

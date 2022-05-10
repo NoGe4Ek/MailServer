@@ -205,6 +205,7 @@ class AdminService {
                     lastName = person.lastName!!,
                     firstName = person.firstName!!,
                     patronymic = person.patronymic!!,
+                    email = person.email!!,
                     admin = admin,
                     user = user,
                     date = staff.created!!.toLocalDate().toString()
