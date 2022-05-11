@@ -23,18 +23,18 @@ interface GroupAttributesRepository : JpaRepository<GroupAttributesModel, UUID> 
     @Modifying
     @Query(
         """
-            select cast(ga.id as varchar) as idGroupName, ga.name as groupName from group_attributes ga 
-            where cast(ga.id_staff as varchar) = 'ad7a8951-2f95-4619-802b-1285c3279623' 
+            select cast(ga.id as varchar) as idGroupName, ga.name as groupName, cast(ga.id_staff as varchar) as idStaff from group_attributes ga 
+            where cast(ga.id_staff as varchar) = ?2
             or cast(ga.id_staff as varchar) = ?1
         """,
         nativeQuery = true
     )
-    fun getGroupNames(idStaff: String): MutableList<GroupNameProjection>
+    fun getGroupNames(idStaff: String, idBasic: String): MutableList<GroupNameProjection>
 
     @Modifying
     @Query(
         """
-            select cast(ga.id as varchar) as idGroupName, ga.name as groupName from group_attributes ga 
+            select cast(ga.id as varchar) as idGroupName, ga.name as groupName, cast(ga.id_staff as varchar) as idStaff from group_attributes ga 
             where cast(ga.id_staff as varchar) = ?1
         """,
         nativeQuery = true

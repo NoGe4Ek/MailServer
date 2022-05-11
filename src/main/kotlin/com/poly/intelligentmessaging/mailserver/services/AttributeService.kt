@@ -67,6 +67,7 @@ class AttributeService {
             } else "success"
             val attributesDTO = AttributesDTO(
                 id = attribute.id.toString(),
+                owner = attribute.staff!!.id.toString(),
                 attributeName = attribute.name!!,
                 groupName = attribute.group!!.name!!,
                 expression = expression,
@@ -85,6 +86,7 @@ class AttributeService {
         val attribute = attributeRepository!!.findById(UUID.fromString(attributeIdDTO.idAttribute)).get()
         return AttributesDTO(
             id = attribute.id.toString(),
+            owner = attribute.staff!!.id.toString(),
             attributeName = attribute.name!!,
             groupName = attribute.group!!.name!!,
             expression = attribute.expression,

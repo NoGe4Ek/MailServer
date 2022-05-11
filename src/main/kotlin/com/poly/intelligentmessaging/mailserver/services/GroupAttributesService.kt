@@ -40,7 +40,7 @@ class GroupAttributesService {
     }
 
     fun getGroupNames(idStaff: String): MutableList<GroupNameProjection> {
-        return groupAttributesRepository!!.getGroupNames(idStaff)
+        return groupAttributesRepository!!.getGroupNames(idStaff, BASIC_ID_STAFF)
     }
 
     fun getGroupNamesCurrentStaff(idStaff: String): MutableList<GroupNameProjection> {

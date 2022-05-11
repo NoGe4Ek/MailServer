@@ -2,6 +2,7 @@ package com.poly.intelligentmessaging.mailserver.domain.dto
 
 data class AttributesDTO(
     val id: String,
+    val owner: String,
     val attributeName: String,
     val groupName: String,
     val expression: String? = null,
