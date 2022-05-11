@@ -69,6 +69,7 @@ class EmailBox {
     
     Ваш новый пароль: $password
     
+    https://poly-sender.ru
     
     С уважением, PolySender!""".trimIndent()
         )
@@ -100,7 +101,14 @@ class EmailBox {
         val mimeMessage = javaMailSender.createMimeMessage()
         val content = messageFields.contentMultipart != null
         val email = MimeMessageHelper(mimeMessage, content, "UTF-8")
-        email.setTo(messageFields.recipientAddress!!.toTypedArray())
+        email.setTo(messageFields.recipientAddress!!.toTypedArray()[0])
+        if (messageFields.recipientAddress!!.isNotEmpty()) {
+            email.setBcc(
+                messageFields.recipientAddress!!
+                    .toList().subList(1, messageFields.recipientAddress!!.size)
+                    .toTypedArray()
+            )
+        }
         if (content) {
             email.mimeMessage.setContent(messageFields.contentMultipart)
         } else {
